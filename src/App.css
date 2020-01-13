@@ -1,38 +1,47 @@
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
 .App {
-  text-align: center;
+  display: block;
+  width: 100vw;
+  height: 100vh;
 }
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+#classroom-details {
+  position: absolute;
+  left: 3vw;
+  top: 20px;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+#classroom {
+  position: absolute;
+  left: 29vw;
+  transform-origin: top center;
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.row {
+  width: 70vw;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  flex-direction: row;
+  justify-content: space-around;
 }
-
-.App-link {
-  color: #61dafb;
+.desk {
+  touch-action: none;
+  display: inline-block;
+  width: 10vw;
+  height: 10vw;
+  background-color: gray;
+  text-align: center;
+  line-height: 100px;
+  -moz-user-select: none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.desk:hover {
+  cursor: move;
+}
+#import-button {
+  text-align: center;
+  margin-top: 40px;
 }
