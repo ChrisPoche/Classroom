@@ -1,4 +1,14 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a simple classroom application. For the time being, students are hard coded in using an attached txt file with JSON formatted data.
+
+## Planned features:
+- Expand to have multiple classrooms, with searchable dashboard
+- Double click student to change attendance status
+- Click on student's chiclet to see more options (profile, grades, attendance, etc.)
+- Enable touch screen compatability
+- Improve fluidity of drag and drop funcitonality without third-party library
+- Add/remove students from classroom
+- Expand classroom details section
+- Create Edit Mode, disabling the rearrangement, removal, and addition of students when this is locked
 
 ## Available Scripts
 
