@@ -5,7 +5,10 @@ import Student from './components/Student';
 export default class App extends React.Component {
   constructor(props) {
     super(props);
+    let date = new Date();
+    date = date.toLocaleDateString();
     let classList = JSON.parse(localStorage.getItem('class-list')) || [];
+    classList.map(desk => desk.attendance = [{ date, present: -1, statusLastModified: '' }]);
     classList.map((desk, index) => desk.order = index + 1);
 
     this.state = {
@@ -15,9 +18,13 @@ export default class App extends React.Component {
       dragOver: -1,
       dragElement: '',
       // rearrange: 'slide'
-      rearrange: 'swap'
+      rearrange: 'swap',
+      date,
+      mode: 'edit' // edit 
+      // mode: 'quickAttendance' // edit 
     }
 
+    this.changeAttendanceStatus = this.changeAttendanceStatus.bind(this);
     this.updateOrder = this.updateOrder.bind(this);
     this.updateDragElement = this.updateDragElement.bind(this);
   }
@@ -44,7 +51,9 @@ export default class App extends React.Component {
 
     if (this.state.rearrange === 'swap') {
       if (this.state.dragElement) document.getElementById(this.state.dragElement).style.backgroundColor = '';
-      if (this.state.dragOver !== -1 && prevState.rearrange !== 'slide') document.getElementById(this.state.dragOver).style.backgroundColor = 'red';
+      document.addEventListener('drag', () => {
+        if (this.state.dragOver !== -1 && prevState.rearrange !== 'slide' && prevState.mode === this.state.mode) document.getElementById(this.state.dragOver).style.backgroundColor = 'rgba(0,0,0,.2)';
+      })
       if (prevState.dragOver !== this.state.dragOver) {
         if (prevState.dragOver !== -1) document.getElementById(prevState.dragOver).style.backgroundColor = '';
       }
@@ -61,7 +70,7 @@ export default class App extends React.Component {
 
     if (this.state.rearrange === 'slide' && prevState.dragOver !== this.state.dragOver && this.state.dragOver !== -1 && this.state.dragOver !== this.state.dragElement) {
       if (prevState.dragOver !== -1) document.getElementById(prevState.dragOver).style.backgroundColor = '';
-      if (prevState.rearrange !== 'swap') document.getElementById(this.state.dragOver).style.backgroundColor = 'red';
+      if (prevState.rearrange !== 'swap') document.getElementById(this.state.dragOver).style.backgroundColor = 'rgba(0,0,0,.2)';
 
     }
     if (prevState.classList && (prevState.classList !== this.state.classList || this.state.dragElement === this.state.dragOver)) {
@@ -80,7 +89,7 @@ export default class App extends React.Component {
           desk.order >= this.state.dragElement && desk.order !== this.state.dragOver
     }).forEach(desk => {
       let showUpdate = document.getElementById(desk.order);
-      showUpdate.style.backgroundColor = 'red';
+      showUpdate.style.backgroundColor = 'rgba(0,0,0,.2)';
       let timeout = 500;
       showUpdate.style.transition = `all ${timeout}ms`;
       setTimeout(() => {
@@ -102,6 +111,26 @@ export default class App extends React.Component {
     e.preventDefault();
     this.setState({ rearrange: this.state.rearrange === 'swap' ? 'slide' : 'swap' });
   }
+  changeQuickAttendance = (e) => {
+    e.preventDefault();
+    this.setState({ mode: this.state.mode !== 'quickAttendance' ? 'quickAttendance' : 'Attendance' });
+    this.quickAttendanceSetAll();
+  }
+  toggleAttendance = (e) => {
+    e.preventDefault();
+    let mode = this.state.mode.includes('Attendance') ? '' : 'Attendance'
+    this.setState({ mode });
+    if (mode === '') {
+      let absent = document.getElementsByClassName('attendance-absent') || [];
+      absent = [...absent];
+      // console.log(absent);
+      absent.forEach((desk, index) => {
+        let student = document.getElementById(desk.id);
+        student.className = 'desk absent';
+        // student.setAttribute('draggable', false);
+      });
+    }
+  }
   updateRows = (classList, deskPerRow) => {
     let placeholder = [];
     let numberOfRows = deskPerRow || 4;
@@ -119,7 +148,14 @@ export default class App extends React.Component {
     // fetch('/files/class-list-number.txt')
     fetch('/files/class-list.txt')
       .then(response => response.text())
-      .then(text => this.setState({ classList: JSON.parse(text) }))
+      .then(text => {
+        let date = new Date();
+        date = date.toLocaleDateString();
+        let classList = JSON.parse(text);
+        classList.map(desk => desk.attendance = [{ date, present: -1, statusLastModified: '' }]);
+        classList.map((desk, index) => desk.order = index + 1);
+        return this.setState({ classList })
+      });
   }
   getClassroomScale = () => {
     let classroom = document.getElementById('classroom');
@@ -163,6 +199,47 @@ export default class App extends React.Component {
     }
     this.setState({ classList: updatedClasslist });
   }
+  changeAttendanceStatus = (e) => {
+    let index = parseInt(e.target.id) - 1;
+    let date = new Date();
+    let time = date.toLocaleString();
+    let classList = this.state.classList;
+    let attendanceArr = classList[index].attendance || [];
+    let todaysIndex = -1;
+    attendanceArr.filter((val, index) => {
+      if (val.date === this.state.date) return todaysIndex = index;
+      else return false;
+    })
+    let present = attendanceArr[todaysIndex].present < 1 ? 1 : 0;  // 0 = Absent, 1 = Prensent
+    let todaysAttendance = {
+      date: this.state.date,
+      present,
+      statusLastModified: time
+    }
+
+    todaysIndex === -1 ? attendanceArr.push(todaysAttendance) : attendanceArr[todaysIndex] = todaysAttendance;
+    this.setState({ classList })
+    // console.log('Double Clicked', classList[index]);
+  }
+  quickAttendanceSetAll = () => {
+    let date = new Date();
+    let time = date.toLocaleString();
+    let classList = this.state.classList;
+    classList.map((val, index) => {
+      let arr = val.attendance;
+      let todaysIndex = -1;
+      arr.filter((val, index) => {
+        if (val.date === this.state.date) return todaysIndex = index;
+        else return todaysIndex;
+      })
+      let todaysAttendance = {
+        date: this.state.date,
+        present: val.attendance[todaysIndex].present === -1 || val.attendance[todaysIndex].present === 1 ? 1 : 0,
+        statusLastModified: time
+      }
+      return todaysIndex === -1 ? val.attendance.push(todaysAttendance) : val.attendance[todaysIndex] = todaysAttendance;
+    })
+  }
   render() {
     return (
       <div className="App">
@@ -176,6 +253,13 @@ export default class App extends React.Component {
                 <div>
                   <button onClick={this.changeRearrangeType}>{this.state.rearrange === 'swap' ? 'Change to Slide Method' : 'Change to Swap Method'}</button>
                 </div>
+                {this.state.mode.includes('Attendance') && (<div>
+                  <button id='toggle-quickattendance-button' onClick={this.changeQuickAttendance}>{this.state.mode !== 'quickAttendance' ? 'Enable Quick Attendance' : 'Disable Quick Attendance'}</button>
+                </div>
+                )}
+                <div>
+                  <button id='toggle-attendance-button' onClick={this.toggleAttendance}>{this.state.mode.includes('Attendance') ? 'Submit Attendance' : 'Take Attendance'}</button>
+                </div>
               </div>
             </form>
           </div>)}
@@ -187,7 +271,28 @@ export default class App extends React.Component {
           </div>
         )
         }
-        <div id='classroom'>{this.state.classList.length > 0 && this.updateRows(this.state.classList, this.state.deskPerRow).map((row, rowIndex) => <div className='row' key={`row-${rowIndex}`}>{row.map((student, index) => <Student deskPerRow={this.state.deskPerRow} displayrow={rowIndex} displaydesk={index + 1} updateOrder={this.updateOrder} updateDragElement={this.updateDragElement} key={`${(this.state.deskPerRow * rowIndex) + index + 1}`} name={student.name} />)}</div>)}</div>
+        <div id='classroom'>
+          {this.state.classList.length > 0 && this.updateRows(this.state.classList, this.state.deskPerRow).map((row, rowIndex) => {
+            return (
+              <div className='row' key={`row-${rowIndex}`}>
+                {row.map((student, index) => {
+                  return <Student
+                    key={`${(this.state.deskPerRow * rowIndex) + index + 1}`}
+                    deskPerRow={this.state.deskPerRow}
+                    displayrow={rowIndex}
+                    displaydesk={index + 1}
+                    mode={this.state.mode}
+                    changeAttendanceStatus={this.changeAttendanceStatus}
+                    updateOrder={this.updateOrder}
+                    updateDragElement={this.updateDragElement}
+                    name={student.name}
+                    attendance={student.attendance && student.attendance[student.attendance.length - 1]}
+                  />
+                })}
+              </div>
+            )
+          })}
+        </div>
       </div>
     );
   }

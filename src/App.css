@@ -45,3 +45,19 @@ body {
   text-align: center;
   margin-top: 40px;
 }
+.attendance-present {
+  background-color: rgba(0, 255, 0, .3);
+}
+.attendance-absent {
+  background-color: rgba(255, 0, 0, .3);
+}
+.absent {
+  opacity: 0.2;
+  /* z-index: -100; */
+}
+button {
+  margin-bottom: 40px;
+}
+#toggle-attendance-button, #toggle-quickattendance-button {
+  margin-bottom: 20px;
+}
