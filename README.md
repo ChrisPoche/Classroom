@@ -1,7 +1,7 @@
 This is a simple classroom application. For the time being, students are hard coded in using an attached txt file with JSON formatted data.
 
 ## Planned features:
-- Large clock in class details section
+- ~~Large clock in class details section~~
 - Random Name Generator
 - Timer
 - Expand to have multiple classrooms, with searchable dashboard
@@ -12,7 +12,7 @@ This is a simple classroom application. For the time being, students are hard co
 - Improve fluidity of drag and drop funcitonality without third-party library
 - Add/remove students from classroom
 - Expand classroom details section
-- Create Edit Mode, disabling the rearrangement, removal, and addition of students when this is locked
+- Within Edit Mode, disabling the rearrangement, removal, and addition of students when this is locked
 
 ## Available Scripts
 

@@ -18,11 +18,9 @@ export default class App extends React.Component {
       deskPerRow: 6,
       dragOver: -1,
       dragElement: '',
-      // rearrange: 'slide'
       rearrange: 'swap',
       date,
-      mode: 'edit' // edit 
-      // mode: 'quickAttendance' // edit 
+      mode: '' // edit 
     }
 
     this.changeAttendanceStatus = this.changeAttendanceStatus.bind(this);
@@ -47,7 +45,7 @@ export default class App extends React.Component {
       if (e.key === 'a' || e.key === 't' || e.key === 'q') {
         this.toggleAttendance(e);
         if (e.key === 'q') this.changeQuickAttendance(e);
-      } 
+      }
     })
   }
   componentDidUpdate = (prevProps, prevState) => {
@@ -260,6 +258,9 @@ export default class App extends React.Component {
           <div id='classroom-details'>
             <Clock />
             <form>
+              <div>
+                <button id='toggle-edit-button' onClick={this.changeEdit}>{this.state.mode !== 'edit' ? 'Enable Edit Mode' : 'Disable Edit Mode'}</button>
+              </div>
               {this.state.mode === 'edit' && (
                 <div>
                   <label>Number of desks per row: </label>
@@ -272,9 +273,6 @@ export default class App extends React.Component {
                   </div>
                 </div>
               )}
-              {this.state.mode !== 'edit' && (<div>
-                <button id='toggle-edit-button' onClick={this.changeEdit}>Enable Edit Mode</button>
-              </div>)}
               {this.state.mode.includes('Attendance') && (<div>
                 <button id='toggle-quickattendance-button' onClick={this.changeQuickAttendance}>{this.state.mode !== 'quickAttendance' ? 'Enable Quick Attendance' : 'Disable Quick Attendance'}</button>
               </div>)}
