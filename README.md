@@ -2,17 +2,21 @@ This is a simple classroom application. For the time being, students are hard co
 
 ## Planned features:
 - ~~Large clock in class details section~~
-- Random Name Generator
 - Timer
+- ~~Random Name Generator~~
+  - Add spinner, random desk cycling animation
+  - Click on randomly generated name, to highlight the student's desk  
 - Expand to have multiple classrooms, with searchable dashboard
 - ~~Take Attendance Mode: Double click student to change attendance status~~
 - ~~Quick Attendance Mode: All students are marked present, can be selected / deselected with single click~~
 - Click on student's chiclet to see more options (profile, grades, attendance, etc.)
-- Enable touch screen compatability
+- Enable (full) touch screen compatability
 - Improve fluidity of drag and drop funcitonality without third-party library
 - Add/remove students from classroom
 - Expand classroom details section
-- Within Edit Mode, disabling the rearrangement, removal, and addition of students when this is locked
+- Within Edit Mode restrict functions when locked: 
+  - ~~Disabling the rearrangement of students~~ 
+  - Removal and addition of students
 
 ## Available Scripts
 
