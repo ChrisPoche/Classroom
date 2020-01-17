@@ -59,12 +59,21 @@ body {
   opacity: 0.2;
   /* z-index: -100; */
 }
+
+#random-name {
+  font-weight: bolder;
+  display: inline-block;
+}
+
 button {
   margin-bottom: 40px;
 }
 #tfh-button {
   margin-top: 40px;
 }
-#toggle-attendance-button, #toggle-quickattendance-button {
+#generate-name-button, #generate-name-button-no-repeats {
+  margin-bottom: 0;
+}
+#toggle-quickattendance-button {
   margin-bottom: 20px;
 }

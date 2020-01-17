@@ -2,6 +2,7 @@ import React from 'react';
 import './App.css';
 import Student from './components/Student';
 import Clock from './components/Clock';
+import RandomNameGenerator from './components/RandomNameGenerator';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -279,6 +280,7 @@ export default class App extends React.Component {
               <div>
                 <button id='toggle-attendance-button' onClick={this.toggleAttendance}>{this.state.mode.includes('Attendance') ? 'Submit Attendance' : 'Take Attendance'}</button>
               </div>
+              <RandomNameGenerator classList={this.state.classList}/>
             </form>
           </div>)
         }
