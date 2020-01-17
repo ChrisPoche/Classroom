@@ -1,0 +1,52 @@
+import React from 'react';
+
+export default class Clock extends React.Component {
+    constructor(props) {
+        super(props);
+        let twentyFourHour = localStorage.getItem('Clock-ISO-Format') ?
+            localStorage.getItem('Clock-ISO-Format') === 'false' ?
+                false :
+                true :
+            false;
+        let time = twentyFourHour ? new Date().toTimeString() : new Date().toLocaleTimeString();
+        time = twentyFourHour ? time.slice(0, time.indexOf(' ') - 3) : time.slice(0, time.indexOf(' ') - 3) + time.slice(time.indexOf(' '));
+
+        this.state = {
+            time,
+            twentyFourHour
+        }
+    }
+    componentDidMount = () => {
+        this.getTime();
+        localStorage.setItem('Clock-ISO-Format', this.state.twentyFourHour);
+        let clock = document.getElementById('clock');
+        clock.style.transform = 'scale(1.75)';
+    }
+    componentDidUpdate = () => {
+        this.getTime();
+    }
+    getTime = () => {
+        let time = new Date();
+        let offset = 60 - time.getSeconds();
+        if (offset !== 0) setTimeout(this.updateTimeString, offset * 998); // offset the time of function call
+    }
+    updateTimeString = (twentyFourHour = this.state.twentyFourHour) => {
+        let time = twentyFourHour ? new Date().toTimeString() : new Date().toLocaleTimeString();
+        time = twentyFourHour ? time.slice(0, time.indexOf(' ') - 3) : time.slice(0, time.indexOf(' ') - 3) + time.slice(time.indexOf(' '));
+        this.setState({ time })
+    }
+    toggleISOFormat = () => {
+        let twentyFourHour = !!this.state.twentyFourHour ? false : true;
+        localStorage.setItem('Clock-ISO-Format', twentyFourHour);
+        this.setState({ twentyFourHour });
+        this.updateTimeString(twentyFourHour);
+    }
+    render() {
+        return (
+            <div>
+                <h1 id='clock'>{this.state.time}</h1>
+                <button id='tfh-button' onClick={this.toggleISOFormat}>{this.state.twentyFourHour ? '12 Hour Format' : '24 Hour Format'}</button>
+            </div>
+        );
+    }
+}
