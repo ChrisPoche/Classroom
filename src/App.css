@@ -12,6 +12,10 @@ body {
   position: absolute;
   left: 3vw;
   top: 20px;
+  width: 29vw;
+}
+#clock {
+  transform-origin: top left;
 }
 #classroom {
   position: absolute;
@@ -57,6 +61,9 @@ body {
 }
 button {
   margin-bottom: 40px;
+}
+#tfh-button {
+  margin-top: 40px;
 }
 #toggle-attendance-button, #toggle-quickattendance-button {
   margin-bottom: 20px;

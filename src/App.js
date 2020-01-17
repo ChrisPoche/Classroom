@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import Student from './components/Student';
+import Clock from './components/Clock';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -257,6 +258,7 @@ export default class App extends React.Component {
       <div className="App">
         {this.state.classList.length > 0 && (
           <div id='classroom-details'>
+            <Clock />
             <form>
               {this.state.mode === 'edit' && (
                 <div>
