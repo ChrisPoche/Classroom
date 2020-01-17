@@ -40,6 +40,14 @@ export default class App extends React.Component {
         this.setState({ dragOver: parseInt(e.target.id) });
       }
     })
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 's') this.changeRearrangeType();
+      if (e.key === 'e') this.changeEdit(e);
+      if (e.key === 'a' || e.key === 't' || e.key === 'q') {
+        this.toggleAttendance(e);
+        if (e.key === 'q') this.changeQuickAttendance(e);
+      } 
+    })
   }
   componentDidUpdate = (prevProps, prevState) => {
     if (!this.state.importedList) {
@@ -115,6 +123,10 @@ export default class App extends React.Component {
     e.preventDefault();
     this.setState({ mode: this.state.mode !== 'quickAttendance' ? 'quickAttendance' : 'Attendance' });
     this.quickAttendanceSetAll();
+  }
+  changeEdit = (e) => {
+    e.preventDefault();
+    this.setState({ mode: this.state.mode !== 'edit' ? 'edit' : '' });
   }
   toggleAttendance = (e) => {
     e.preventDefault();
@@ -246,30 +258,38 @@ export default class App extends React.Component {
         {this.state.classList.length > 0 && (
           <div id='classroom-details'>
             <form>
-              <label>Number of desks per row: </label>
-              <input type='number' max='6' min='3' onChange={this.changeRowCount} value={this.state.deskPerRow} />
+              {this.state.mode === 'edit' && (
+                <div>
+                  <label>Number of desks per row: </label>
+                  <input type='number' max='6' min='3' onChange={this.changeRowCount} value={this.state.deskPerRow} />
+                  <div>
+                    <label>Rearrange Method: {this.state.rearrange === 'swap' ? 'Swap Seats' : 'Slide Seats'} </label>
+                    <div>
+                      <button onClick={this.changeRearrangeType}>{this.state.rearrange === 'swap' ? 'Change to Slide Method' : 'Change to Swap Method'}</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {this.state.mode !== 'edit' && (<div>
+                <button id='toggle-edit-button' onClick={this.changeEdit}>Enable Edit Mode</button>
+              </div>)}
+              {this.state.mode.includes('Attendance') && (<div>
+                <button id='toggle-quickattendance-button' onClick={this.changeQuickAttendance}>{this.state.mode !== 'quickAttendance' ? 'Enable Quick Attendance' : 'Disable Quick Attendance'}</button>
+              </div>)}
               <div>
-                <label>Rearrange Method: {this.state.rearrange === 'swap' ? 'Swap Seats' : 'Slide Seats'} </label>
-                <div>
-                  <button onClick={this.changeRearrangeType}>{this.state.rearrange === 'swap' ? 'Change to Slide Method' : 'Change to Swap Method'}</button>
-                </div>
-                {this.state.mode.includes('Attendance') && (<div>
-                  <button id='toggle-quickattendance-button' onClick={this.changeQuickAttendance}>{this.state.mode !== 'quickAttendance' ? 'Enable Quick Attendance' : 'Disable Quick Attendance'}</button>
-                </div>
-                )}
-                <div>
-                  <button id='toggle-attendance-button' onClick={this.toggleAttendance}>{this.state.mode.includes('Attendance') ? 'Submit Attendance' : 'Take Attendance'}</button>
-                </div>
+                <button id='toggle-attendance-button' onClick={this.toggleAttendance}>{this.state.mode.includes('Attendance') ? 'Submit Attendance' : 'Take Attendance'}</button>
               </div>
             </form>
-          </div>)}
-        {this.state.classList.length === 0 && (
-          <div id='import-button'>
-            <p>New here? Click the button to import demo data</p>
-            <button onClick={this.importClassList}>Import Demo Data</button>
-            <p><strong>Note: this data set is saved to local storage, but can be manually cleared from the devTools Application tab</strong></p>
-          </div>
-        )
+          </div>)
+        }
+        {
+          this.state.classList.length === 0 && (
+            <div id='import-button'>
+              <p>New here? Click the button to import demo data</p>
+              <button onClick={this.importClassList}>Import Demo Data</button>
+              <p><strong>Note: this data set is saved to local storage, but can be manually cleared from the devTools Application tab</strong></p>
+            </div>
+          )
         }
         <div id='classroom'>
           {this.state.classList.length > 0 && this.updateRows(this.state.classList, this.state.deskPerRow).map((row, rowIndex) => {
@@ -293,7 +313,7 @@ export default class App extends React.Component {
             )
           })}
         </div>
-      </div>
+      </div >
     );
   }
 }

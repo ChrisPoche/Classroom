@@ -11,9 +11,6 @@ export default class Student extends React.Component {
             default: 
                 return 'desk';
         }
-        // if (this.props.attendance.present === 1) return 'desk attendance-present'
-        // else if (this.props.attendance.present === 0) 'desk attendance-absent' :
-        // 'desk'
     };
     render() {
         let rowIndex = this.props.displayrow;
@@ -30,7 +27,7 @@ export default class Student extends React.Component {
                     onClick={this.props.mode === 'quickAttendance' && this.props.mode.includes('Attendance') ? this.props.changeAttendanceStatus : this.noWhere}
                     onDoubleClick={this.props.mode !== 'quickAttendance' && this.props.mode.includes('Attendance') ? this.props.changeAttendanceStatus : this.noWhere}
 
-                    draggable='true'
+                    draggable={this.props.mode === 'edit' ? 'true' : 'false'}
                     onDragEnd={this.props.updateOrder}
                     onDragStart={this.props.updateDragElement}>
                     {this.props.name}

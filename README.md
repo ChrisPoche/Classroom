@@ -2,6 +2,8 @@ This is a simple classroom application. For the time being, students are hard co
 
 ## Planned features:
 - Large clock in class details section
+- Random Name Generator
+- Timer
 - Expand to have multiple classrooms, with searchable dashboard
 - ~~Take Attendance Mode: Double click student to change attendance status~~
 - ~~Quick Attendance Mode: All students are marked present, can be selected / deselected with single click~~
