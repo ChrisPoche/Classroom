@@ -4,11 +4,11 @@ import React from 'react';
 export default class Student extends React.Component {
     getClass = () => {
         switch (this.props.attendance.present) {
-            case 0: 
+            case 0:
                 return this.props.mode.includes('Attendance') ? 'desk attendance-absent' : 'desk absent';
-            case 1: 
+            case 1:
                 return this.props.mode.includes('Attendance') ? 'desk attendance-present' : 'desk';
-            default: 
+            default:
                 return 'desk';
         }
     };
@@ -16,10 +16,15 @@ export default class Student extends React.Component {
         let rowIndex = this.props.displayrow;
         let index = this.props.displaydesk;
         let id = (this.props.deskPerRow * rowIndex) + index;
+        let style = this.props.mode === 'edit' ?
+            { cursor: 'move' } :
+            { cursor: 'default' };
         return (
             <React.Fragment>
                 <h4 id={id}
                     className={this.getClass()}
+
+                    style={style}
 
                     displayrow={rowIndex + 1}
                     displaydesk={index}

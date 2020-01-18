@@ -33,6 +33,8 @@ export default class App extends React.Component {
     window.addEventListener('resize', () => {
       this.getClassroomScale();
     })
+    let classList = JSON.parse(localStorage.getItem('class-list'));
+    this.setState({ classList });
     document.addEventListener('dragover', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -41,7 +43,7 @@ export default class App extends React.Component {
       }
     })
     document.addEventListener('keydown', (e) => {
-      if (e.key === 's') this.changeRearrangeType();
+      if (e.key === 's') if(this.state.mode === 'edit') this.changeRearrangeType();
       if (e.key === 'e') this.changeEdit(e);
       if (e.key === 'a' || e.key === 't' || e.key === 'q') {
         this.toggleAttendance(e);
@@ -116,7 +118,7 @@ export default class App extends React.Component {
     this.updateRows(this.state.classList, e.target.value);
   }
   changeRearrangeType = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     this.setState({ rearrange: this.state.rearrange === 'swap' ? 'slide' : 'swap' });
   }
   changeQuickAttendance = (e) => {
@@ -141,6 +143,27 @@ export default class App extends React.Component {
         student.className = 'desk absent';
         // student.setAttribute('draggable', false);
       });
+      let noRepeatClassListTotal = this.state.classList
+        .filter(val => {
+          let date = val.attendance[val.attendance.length - 1].date;
+          let present = val.attendance[val.attendance.length - 1].present.toString();
+          return this.state.date === date && present.includes('1');
+        })
+        .map(val => val.name)
+      let newPresentNames = this.state.changeInAttendance.filter(student => student.present === 1).map(student => student.name);
+      let newAbsentNames = this.state.changeInAttendance.filter(student => student.present === 0).map(student => student.name);
+      // console.log('newAbsentNames', newAbsentNames, 'newPresentNames', newPresentNames)
+      // console.log('Total',noRepeatClassListTotal);
+      let lsNoRepeat = JSON.parse(localStorage.getItem('no-repeat-class-list'));
+      let noRepeatClassList =  lsNoRepeat.length <= noRepeatClassListTotal.length ? lsNoRepeat : noRepeatClassListTotal;
+      // console.log('NoRepeat',noRepeatClassList);
+      noRepeatClassList = noRepeatClassList.concat(newPresentNames).filter(name => !newAbsentNames.includes(name));
+      // console.log('NoRepeat',noRepeatClassList);
+      localStorage.setItem('class-list', JSON.stringify(this.state.classList));
+      localStorage.setItem('no-repeat-class-list', JSON.stringify(noRepeatClassList));
+    }
+    else if (mode === 'Attendance') {
+      this.setState({ changeInAttendance: [] })
     }
   }
   updateRows = (classList, deskPerRow) => {
@@ -228,9 +251,14 @@ export default class App extends React.Component {
       present,
       statusLastModified: time
     }
-
+    //Track Changes to Attendance Between Submissions - for Random Number Genrator No Repeat
+    let changeInAttendance = this.state.changeInAttendance;
+    changeInAttendance.push({
+      name: classList[index].name,
+      present: todaysAttendance.present
+    });
     todaysIndex === -1 ? attendanceArr.push(todaysAttendance) : attendanceArr[todaysIndex] = todaysAttendance;
-    this.setState({ classList })
+    this.setState({ classList, changeInAttendance })
     // console.log('Double Clicked', classList[index]);
   }
   quickAttendanceSetAll = () => {
@@ -277,10 +305,10 @@ export default class App extends React.Component {
               {this.state.mode.includes('Attendance') && (<div>
                 <button id='toggle-quickattendance-button' onClick={this.changeQuickAttendance}>{this.state.mode !== 'quickAttendance' ? 'Enable Quick Attendance' : 'Disable Quick Attendance'}</button>
               </div>)}
-              <div>
+              {this.state.mode !== 'edit' && <div>
                 <button id='toggle-attendance-button' onClick={this.toggleAttendance}>{this.state.mode.includes('Attendance') ? 'Submit Attendance' : 'Take Attendance'}</button>
-              </div>
-              <RandomNameGenerator classList={this.state.classList}/>
+              </div>}
+              {this.state.mode === '' && <RandomNameGenerator classList={this.state.classList} />}
             </form>
           </div>)
         }

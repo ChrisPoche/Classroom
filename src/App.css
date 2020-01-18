@@ -42,9 +42,6 @@ body {
    -ms-user-select: none;
    user-select: none;
 }
-.desk:hover {
-  cursor: move;
-}
 #import-button {
   text-align: center;
   margin-top: 40px;

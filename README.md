@@ -4,6 +4,7 @@ This is a simple classroom application. For the time being, students are hard co
 - ~~Large clock in class details section~~
 - Timer
 - ~~Random Name Generator~~
+  - Random Name Generator only chooses students with a status of present [In Progress]
   - Add spinner, random desk cycling animation
   - Click on randomly generated name, to highlight the student's desk  
 - Expand to have multiple classrooms, with searchable dashboard
