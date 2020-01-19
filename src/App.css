@@ -3,7 +3,7 @@ body {
   height: 100vh;
   overflow: hidden;
 }
-.App {
+#app {
   display: block;
   width: 100vw;
   height: 100vh;
@@ -86,4 +86,32 @@ button {
 }
 #no-date { 
   margin-right: 10px;
+}
+.remove-student-button {
+  position: absolute;
+  display: inline-block;
+  margin-left: -1vw;
+  margin-top: 1vw;
+  text-align: center;
+  background-color: white;
+  width: 1.5vw;
+  height: 1.5vw;
+  line-height: .8; /* Lowercase x lineheight: .8,  Uppercase X lineheight: 1   */
+  border-radius: 50%;
+  font-weight: bolder;
+  border: black 1px solid;
+  color: #aa0202;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, .2);
+  -moz-user-select: none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+   cursor: pointer;
+}
+#removal-confirmation {
+}
+#background-blur {
+  width: 100vw;
+  height: 100vh;
 }

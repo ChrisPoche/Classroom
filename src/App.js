@@ -32,6 +32,7 @@ export default class App extends React.Component {
     this.changeAttendanceStatus = this.changeAttendanceStatus.bind(this);
     this.updateOrder = this.updateOrder.bind(this);
     this.updateDragElement = this.updateDragElement.bind(this);
+    this.removeStudentFromClassList = this.removeStudentFromClassList.bind(this);
   }
   componentDidMount = () => {
     this.getClassroomScale();
@@ -193,7 +194,7 @@ export default class App extends React.Component {
         let date = new Date();
         date = date.toLocaleDateString();
         let classList = JSON.parse(text);
-        classList.map(desk => desk.attendance ? desk.attendance = [{date: this.state.date, present: desk.attendance[0].present, statusLastModified: `${this.state.date},${desk.attendance[0].statusLastModified.split(',')[1]}`}]  : desk.attendance = [{ date, present: -1, statusLastModified: '' }]);
+        classList.map(desk => desk.attendance ? desk.attendance = [{ date: this.state.date, present: desk.attendance[0].present, statusLastModified: `${this.state.date},${desk.attendance[0].statusLastModified.split(',')[1]}` }] : desk.attendance = [{ date, present: -1, statusLastModified: '' }]);
         classList.map((desk, index) => desk.order ? desk.order : desk.order = index + 1);
         let { attendance } = classList[0];
         this.setState({ classList })
@@ -312,75 +313,96 @@ export default class App extends React.Component {
     var file = new File([classList], `class_attendance_${this.state.date}.txt`, { type: "text/plain;charset=utf-8" });
     FileSaver.saveAs(file)
   };
+  removeStudentFromClassList = (e) => {
+    let classListIndex = parseInt(e.target.id.split('-')[0]) - 1;
+    console.log('Removing', classListIndex);
+    let mode = 'remove-student';
+    this.setState({ mode });
+    document.getElementById('app').style.webkitFilter = 'blur(2px)';
+    // Add logic to remove student
+    console.log('Confirmation pop-up will (eventuall) launch now');
+    setTimeout(() => {
+      console.log('Removing blur test');
+      document.getElementById('app').style.webkitFilter = null;
+    }, 2000);
+  }
   render() {
     return (
-      <div className="App">
-        {this.state.classList.length > 0 && (
-          <div id='classroom-details'>
-            <Clock />
-            <form>
-              <div>
-                <button id='toggle-edit-button' onClick={this.changeEdit}>{this.state.mode !== 'edit' ? 'Enable Edit Mode' : 'Disable Edit Mode'}</button>
-              </div>
-              {this.state.mode === 'edit' && (
+      <div>
+        {this.state.mode === 'remove-child' && (
+            <div id='removal-confirmation'>
+
+            </div>
+        )}
+        <div id="app">
+          {this.state.classList.length > 0 && (
+            <div id='classroom-details'>
+              <Clock />
+              <form>
                 <div>
-                  <label>Number of desks per row: </label>
-                  <input type='number' max='6' min='3' onChange={this.changeRowCount} value={this.state.deskPerRow} />
+                  <button id='toggle-edit-button' onClick={this.changeEdit}>{this.state.mode !== 'edit' ? 'Enable Edit Mode' : 'Disable Edit Mode'}</button>
+                </div>
+                {this.state.mode === 'edit' && (
                   <div>
-                    <label>Rearrange Method: {this.state.rearrange === 'swap' ? 'Swap Seats' : 'Slide Seats'} </label>
+                    <label>Number of desks per row: </label>
+                    <input type='number' max='6' min='3' onChange={this.changeRowCount} value={this.state.deskPerRow} />
                     <div>
-                      <button onClick={this.changeRearrangeType}>{this.state.rearrange === 'swap' ? 'Change to Slide Method' : 'Change to Swap Method'}</button>
+                      <label>Rearrange Method: {this.state.rearrange === 'swap' ? 'Swap Seats' : 'Slide Seats'} </label>
+                      <div>
+                        <button onClick={this.changeRearrangeType}>{this.state.rearrange === 'swap' ? 'Change to Slide Method' : 'Change to Swap Method'}</button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              {this.state.mode.includes('Attendance') && (<div>
-                <button id='toggle-quickattendance-button' onClick={this.changeQuickAttendance}>{this.state.mode !== 'quickAttendance' ? 'Enable Quick Attendance' : 'Disable Quick Attendance'}</button>
-              </div>)}
-              {this.state.mode !== 'edit' && <div>
-                <button id='toggle-attendance-button' onClick={this.toggleAttendance}>{this.state.mode.includes('Attendance') ? 'Submit Attendance' : 'Take Attendance'}</button>
-                {this.state.mode === 'Attendance' && <div id='attendance-notes'><p>Double click the student's name to mark them present / absent.</p><p>Or enable quick attendance for single click changes.</p></div>}
-              </div>}
-              {this.state.attendanceTaken && (<div>
-                <button id='export-attendance-button' onClick={this.exportAttendanceList}>Export Attendance List</button>
-              </div>)}
-              {this.state.mode === '' && this.state.attendanceTaken && <RandomNameGenerator classList={this.state.classList} />}
-            </form>
-          </div>)
-        }
-        {
-          this.state.classList.length === 0 && (
-            <div id='import-button'>
-              <p>New here? Click the button to import demo data</p>
-              <button id='no-date' onClick={this.importClassList}>Import Demo Data</button>
-              <button id='date' onClick={this.importClassList}>With Previous Date Info</button>
-              <p><strong>Note: this data set is saved to local storage, but can be manually cleared from the devTools Application tab</strong></p>
-            </div>
-          )
-        }
-        <div id='classroom'>
-          {this.state.classList.length > 0 && this.updateRows(this.state.classList, this.state.deskPerRow).map((row, rowIndex) => {
-            return (
-              <div className='row' key={`row-${rowIndex}`}>
-                {row.map((student, index) => {
-                  return <Student
-                    key={`${(this.state.deskPerRow * rowIndex) + index + 1}`}
-                    deskPerRow={this.state.deskPerRow}
-                    displayrow={rowIndex}
-                    displaydesk={index + 1}
-                    mode={this.state.mode}
-                    changeAttendanceStatus={this.changeAttendanceStatus}
-                    updateOrder={this.updateOrder}
-                    updateDragElement={this.updateDragElement}
-                    name={student.name}
-                    attendance={student.attendance && student.attendance[student.attendance.length - 1]}
-                  />
-                })}
+                )}
+                {this.state.mode.includes('Attendance') && (<div>
+                  <button id='toggle-quickattendance-button' onClick={this.changeQuickAttendance}>{this.state.mode !== 'quickAttendance' ? 'Enable Quick Attendance' : 'Disable Quick Attendance'}</button>
+                </div>)}
+                {this.state.mode !== 'edit' && <div>
+                  <button id='toggle-attendance-button' onClick={this.toggleAttendance}>{this.state.mode.includes('Attendance') ? 'Submit Attendance' : 'Take Attendance'}</button>
+                  {this.state.mode === 'Attendance' && <div id='attendance-notes'><p>Double click the student's name to mark them present / absent.</p><p>Or enable quick attendance for single click changes.</p></div>}
+                </div>}
+                {this.state.attendanceTaken && (<div>
+                  <button id='export-attendance-button' onClick={this.exportAttendanceList}>Export Attendance List</button>
+                </div>)}
+                {this.state.mode === '' && this.state.attendanceTaken && <RandomNameGenerator classList={this.state.classList} />}
+              </form>
+            </div>)
+          }
+          {
+            this.state.classList.length === 0 && (
+              <div id='import-button'>
+                <p>New here? Click the button to import demo data</p>
+                <button id='no-date' onClick={this.importClassList}>Import Demo Data</button>
+                <button id='date' onClick={this.importClassList}>With Previous Date Info</button>
+                <p><strong>Note: this data set is saved to local storage, but can be manually cleared from the devTools Application tab</strong></p>
               </div>
             )
-          })}
-        </div>
-      </div >
+          }
+          <div id='classroom'>
+            {this.state.classList.length > 0 && this.updateRows(this.state.classList, this.state.deskPerRow).map((row, rowIndex) => {
+              return (
+                <div className='row' key={`row-${rowIndex}`}>
+                  {row.map((student, index) => {
+                    return <Student
+                      key={`${(this.state.deskPerRow * rowIndex) + index + 1}`}
+                      deskPerRow={this.state.deskPerRow}
+                      displayrow={rowIndex}
+                      displaydesk={index + 1}
+                      mode={this.state.mode}
+                      changeAttendanceStatus={this.changeAttendanceStatus}
+                      updateOrder={this.updateOrder}
+                      updateDragElement={this.updateDragElement}
+                      removeStudentFromClassList={this.removeStudentFromClassList}
+                      name={student.name}
+                      attendance={student.attendance && student.attendance[student.attendance.length - 1]}
+                    />
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        </div >
+      </div>
     );
   }
 }

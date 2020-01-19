@@ -12,6 +12,16 @@ export default class Student extends React.Component {
                 return 'desk';
         }
     };
+    changeRemoveButtonOpacity = (e) => {
+        let removeButton = `${e.target.id}-remove`;
+        document.getElementById(removeButton).style.opacity = '0';
+        this.props.updateDragElement(e);
+    }
+    changeRemoveButtonOpacityBack = (e) => {
+        let removeButton = `${e.target.id}-remove`;
+        document.getElementById(removeButton).style.opacity = '1';
+        this.props.updateOrder(e);
+    }
     render() {
         let rowIndex = this.props.displayrow;
         let index = this.props.displaydesk;
@@ -19,8 +29,9 @@ export default class Student extends React.Component {
         let style = this.props.mode === 'edit' ?
             { cursor: 'move' } :
             { cursor: 'default' };
+        
         return (
-            <React.Fragment>
+            <div>
                 <h4 id={id}
                     className={this.getClass()}
 
@@ -33,11 +44,12 @@ export default class Student extends React.Component {
                     onDoubleClick={this.props.mode !== 'quickAttendance' && this.props.mode.includes('Attendance') ? this.props.changeAttendanceStatus : this.noWhere}
 
                     draggable={this.props.mode === 'edit' ? 'true' : 'false'}
-                    onDragEnd={this.props.updateOrder}
-                    onDragStart={this.props.updateDragElement}>
+                    onDragEnd={this.changeRemoveButtonOpacityBack}
+                    onDragStart={this.changeRemoveButtonOpacity}>
                     {this.props.name}
                 </h4>
-            </React.Fragment >
+                {this.props.mode === 'edit' && <div onClick={this.props.removeStudentFromClassList} id={`${id}-remove`} className='remove-student-button'>x</div>}
+            </div>
         )
     }
 }
