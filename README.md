@@ -13,7 +13,7 @@ This is a simple classroom application. For the time being, students are hard co
 - Click on student's chiclet to see more options (profile, grades, attendance, etc.)
 - Enable (full) touch screen compatability
 - Improve fluidity of drag and drop funcitonality without third-party library
-- Add/remove students from classroom
+- Add/remove students from classroom (In Progress)
 - Expand classroom details section
 - Within Edit Mode restrict functions when locked: 
   - ~~Disabling the rearrangement of students~~ 
