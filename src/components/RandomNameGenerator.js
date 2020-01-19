@@ -10,11 +10,12 @@ export default class RandomNameGenerator extends React.Component {
                 return new Date().toLocaleDateString() === record.date && record.present.toString().includes('1');
             })
             .map(val => val.name);
+            let nrClassListLength = JSON.parse(localStorage.getItem('no-repeat-class-list')) ? JSON.parse(localStorage.getItem('no-repeat-class-list')).length : 0;
 
         this.state = {
             randomName: '',
             filteredList,
-            nrClassList: JSON.parse(localStorage.getItem('no-repeat-class-list')) || filteredList,
+            nrClassList: nrClassListLength > 0 ? JSON.parse(localStorage.getItem('no-repeat-class-list')) : filteredList,
         }
     }
     updateList = (filteredList) => {
@@ -23,8 +24,9 @@ export default class RandomNameGenerator extends React.Component {
     grabName = (e) => {
         e.preventDefault();
         let filteredList = false;
+        let nrClassListLength = JSON.parse(localStorage.getItem('no-repeat-class-list')) ? JSON.parse(localStorage.getItem('no-repeat-class-list')).length : 0;
         if (this.state.filteredList.length > this.props.classList.length || this.state.filteredList.length < this.props.classList.length) {
-            filteredList = this.props.classList
+            filteredList = JSON.parse(JSON.stringify(this.props.classList))
                 .filter(val => {
                     let record = val.attendance[val.attendance.length - 1];
                     return new Date().toLocaleDateString() === record.date && record.present.toString().includes('1');
@@ -35,16 +37,16 @@ export default class RandomNameGenerator extends React.Component {
         let classList =
             e.target.id === 'generate-name-button' ?
                 filteredList || this.state.filteredList :
-                JSON.parse(localStorage.getItem('no-repeat-class-list')) || this.state.nrClassList;
+                nrClassListLength > 0 ? JSON.parse(localStorage.getItem('no-repeat-class-list')) : filteredList || this.state.nrClassList;
         let index = Math.floor(Math.random() * classList.length);
         let randomName = classList[index];
-        // console.log('grabbing name', randomName);
-        if (randomName === this.state.randomName) this.grabName(e);
+        if (randomName === this.state.randomName && this.state.filteredList.length <= 2) this.grabName(e);
         else {
             this.setState({ randomName });
             // console.log(classList)
-            if (e.target.id === 'generate-name-button-no-repeats') classList.length <= 1 ? localStorage.setItem('no-repeat-class-list', JSON.stringify(this.state.filteredList)) : localStorage.setItem('no-repeat-class-list', JSON.stringify(classList.filter((val, ind) => ind !== index)));
+            if (e.target.id === 'generate-name-button-no-repeats') classList.length < 1 ? localStorage.setItem('no-repeat-class-list', JSON.stringify(this.state.filteredList)) : localStorage.setItem('no-repeat-class-list', JSON.stringify(classList.filter((val, ind) => ind !== index)));
             // console.log('List Total Before Removal', classList.length)
+            // console.log('grabbing name', randomName);
             // console.log('New List', classList.filter((val, ind) => ind !== index));
         }
     }
