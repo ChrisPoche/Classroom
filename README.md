@@ -18,6 +18,7 @@ This is a simple classroom application. For the time being, students are hard co
 - Within Edit Mode restrict functions when locked: 
   - ~~Disabling the rearrangement of students~~ 
   - Removal and addition of students
+- ~~Export attendance list (for testing)~~
 
 ## Available Scripts
 

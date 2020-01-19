@@ -1,4 +1,5 @@
 import React from 'react';
+import FileSaver from 'file-saver';
 import './App.css';
 import Student from './components/Student';
 import Clock from './components/Clock';
@@ -10,8 +11,6 @@ export default class App extends React.Component {
     let date = new Date();
     date = date.toLocaleDateString();
     let classList = JSON.parse(localStorage.getItem('class-list')) || [];
-    // classList.map(desk => desk.attendance = [{ date, present: -1, statusLastModified: '' }]);
-    // classList.map((desk, index) => desk.order = index + 1);
     let attendanceTaken;
     if (JSON.parse(localStorage.getItem('class-list'))) {
       attendanceTaken = JSON.parse(localStorage.getItem('class-list')).length > 0 ? true : false;
@@ -137,7 +136,7 @@ export default class App extends React.Component {
     this.setState({ mode: this.state.mode !== 'edit' ? 'edit' : '' });
   }
   toggleAttendance = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     let mode = this.state.mode.includes('Attendance') ? '' : 'Attendance'
     this.setState({ mode });
     if (mode === '') {
@@ -180,17 +179,28 @@ export default class App extends React.Component {
     }
     return placeholder;
   }
-  importClassList = () => {
+  importClassList = (e) => {
     // fetch('/files/class-list-number.txt')
-    fetch('/files/class-list.txt')
+    // fetch('/files/class-list.txt')
+    let id = e.target.id;
+    let date = this.state.date;
+    date = date.split('/');
+    date = date.join('_');
+    let filename = id.includes('no') ? 'class-list.txt' : `class_attendance_${date}.txt`;
+    fetch(`/files/${filename}`)
       .then(response => response.text())
       .then(text => {
         let date = new Date();
         date = date.toLocaleDateString();
         let classList = JSON.parse(text);
-        classList.map(desk => desk.attendance = [{ date, present: -1, statusLastModified: '' }]);
-        classList.map((desk, index) => desk.order = index + 1);
-        return this.setState({ classList })
+        classList.map(desk => desk.attendance ? desk.attendance = [{date: this.state.date, present: desk.attendance[0].present, statusLastModified: `${this.state.date},${desk.attendance[0].statusLastModified.split(',')[1]}`}]  : desk.attendance = [{ date, present: -1, statusLastModified: '' }]);
+        classList.map((desk, index) => desk.order ? desk.order : desk.order = index + 1);
+        let { attendance } = classList[0];
+        this.setState({ classList })
+        if (attendance.present !== -1 && !id.includes('no')) {
+          this.toggleAttendance();
+          this.toggleAttendance();
+        }
       });
   }
   getClassroomScale = () => {
@@ -265,7 +275,7 @@ export default class App extends React.Component {
         if (val.date === this.state.date) return todaysIndex = index;
         else return todaysIndex;
       })
-      let todaysAttendance = this.updateAttendance(val.attendance, todaysIndex, originFunction);
+      let todaysAttendance = val.attendance[0] ? val.attendance[0] : this.updateAttendance(val.attendance, todaysIndex, originFunction);
       return todaysIndex === -1 ? val.attendance.push(todaysAttendance) : val.attendance[todaysIndex] = todaysAttendance;
     });
     localStorage.setItem('class-list', JSON.stringify(classList));
@@ -296,6 +306,12 @@ export default class App extends React.Component {
     }
     return todaysAttendance;
   }
+  exportAttendanceList = () => {
+    console.log("Exporting Attendance List");
+    let classList = localStorage.getItem('class-list');
+    var file = new File([classList], `class_attendance_${this.state.date}.txt`, { type: "text/plain;charset=utf-8" });
+    FileSaver.saveAs(file)
+  };
   render() {
     return (
       <div className="App">
@@ -325,6 +341,9 @@ export default class App extends React.Component {
                 <button id='toggle-attendance-button' onClick={this.toggleAttendance}>{this.state.mode.includes('Attendance') ? 'Submit Attendance' : 'Take Attendance'}</button>
                 {this.state.mode === 'Attendance' && <div id='attendance-notes'><p>Double click the student's name to mark them present / absent.</p><p>Or enable quick attendance for single click changes.</p></div>}
               </div>}
+              {this.state.attendanceTaken && (<div>
+                <button id='export-attendance-button' onClick={this.exportAttendanceList}>Export Attendance List</button>
+              </div>)}
               {this.state.mode === '' && this.state.attendanceTaken && <RandomNameGenerator classList={this.state.classList} />}
             </form>
           </div>)
@@ -333,7 +352,8 @@ export default class App extends React.Component {
           this.state.classList.length === 0 && (
             <div id='import-button'>
               <p>New here? Click the button to import demo data</p>
-              <button onClick={this.importClassList}>Import Demo Data</button>
+              <button id='no-date' onClick={this.importClassList}>Import Demo Data</button>
+              <button id='date' onClick={this.importClassList}>With Previous Date Info</button>
               <p><strong>Note: this data set is saved to local storage, but can be manually cleared from the devTools Application tab</strong></p>
             </div>
           )

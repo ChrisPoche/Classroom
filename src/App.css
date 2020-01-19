@@ -80,3 +80,10 @@ button {
   width: 80%;
   margin-top: 0;
 }
+#export-attendance-button {
+  position: absolute;
+  top: 91vh;
+}
+#no-date { 
+  margin-right: 10px;
+}
