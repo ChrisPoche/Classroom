@@ -20,6 +20,8 @@ export default class App extends React.Component {
     this.state = {
       attendanceTaken,
       classList,
+      changeInAttendance: [],
+      classListModified: 'No',
       importedList: false,
       deskPerRow: 6,
       dragOver: -1,
@@ -32,7 +34,7 @@ export default class App extends React.Component {
     this.changeAttendanceStatus = this.changeAttendanceStatus.bind(this);
     this.updateOrder = this.updateOrder.bind(this);
     this.updateDragElement = this.updateDragElement.bind(this);
-    this.removeStudentFromClassList = this.removeStudentFromClassList.bind(this);
+    this.removeConfirmation = this.removeConfirmation.bind(this);
   }
   componentDidMount = () => {
     this.getClassroomScale();
@@ -65,6 +67,11 @@ export default class App extends React.Component {
 
     this.getClassroomScale();
 
+    if (this.state.changeInAttendance) if (this.state.changeInAttendance.length > 0 && this.state.classListModified === 'Yes') {
+      document.getElementById('export-attendance-button').style.opacity = '1'
+      document.getElementById('export-attendance-button').disabled = false;
+    };
+
     if (this.state.rearrange === 'swap') {
       if (this.state.dragElement) document.getElementById(this.state.dragElement).style.backgroundColor = '';
       document.addEventListener('drag', () => {
@@ -95,6 +102,14 @@ export default class App extends React.Component {
         this.showChangedDesks();
       }
     }
+    if (this.state.mode === 'remove-student') {
+      let seatChartOrigin = document.getElementById('classroom').getBoundingClientRect();
+      let confirmationBox = document.getElementById('removal-confirmation');
+      let cbWidth = confirmationBox.clientWidth;
+      let centerSeatChart = ((seatChartOrigin.width - cbWidth) / 2) + seatChartOrigin.left;
+      confirmationBox.style.left = `${centerSeatChart - 2}px`;
+    }
+
   }
   showChangedDesks = (dragElement, dragOver) => {
     this.state.classList.filter(desk => {
@@ -130,11 +145,15 @@ export default class App extends React.Component {
   changeQuickAttendance = (e) => {
     e.preventDefault();
     this.setState({ mode: this.state.mode !== 'quickAttendance' ? 'quickAttendance' : 'Attendance' });
-    this.quickAttendanceSetAll();
+    this.quickAttendanceSetAll('set-all');
   }
   changeEdit = (e) => {
     e.preventDefault();
-    this.setState({ mode: this.state.mode !== 'edit' ? 'edit' : '' });
+    let mode = this.state.mode !== 'edit' ? 'edit' : '';
+    this.setState({ mode });
+    setTimeout(() => {
+      mode === 'edit' && document.getElementById('desks-per-row').focus();
+    }, 200);
   }
   toggleAttendance = (e) => {
     if (e) e.preventDefault();
@@ -156,8 +175,8 @@ export default class App extends React.Component {
         let present = val.attendance[val.attendance.length - 1].present.toString();
         return this.state.date === date && present.includes('1');
       }).map(val => val.name)
-      let newPresentNames = this.state.changeInAttendance.filter(student => student.present === 1).map(student => student.name);
-      let newAbsentNames = this.state.changeInAttendance.filter(student => student.present === 0).map(student => student.name);
+      let newPresentNames = JSON.parse(JSON.stringify(this.state.changeInAttendance)).filter(student => student.present === 1).map(student => student.name);
+      let newAbsentNames = JSON.parse(JSON.stringify(this.state.changeInAttendance)).filter(student => student.present === 0).map(student => student.name);
       let lsNoRepeat = JSON.parse(localStorage.getItem('no-repeat-class-list')) || noRepeatClassListTotal;
       let noRepeatClassList = lsNoRepeat.length <= noRepeatClassListTotal.length ? lsNoRepeat : noRepeatClassListTotal;
       noRepeatClassList = noRepeatClassList.concat(newPresentNames).filter(name => !newAbsentNames.includes(name));
@@ -173,9 +192,26 @@ export default class App extends React.Component {
     if (classList.length > 0) {
       let subdivideRows = [...Array(classList.length).keys()];
       subdivideRows = subdivideRows.filter(val => val % numberOfRows === 0 || val === classList.length - 1);
+      console.log(subdivideRows);
       subdivideRows.forEach((val, index) => {
-        if (index === subdivideRows.length - 1) placeholder.push(classList.slice(subdivideRows[index - 1]));
-        else if (index > 0) placeholder.push(classList.slice(subdivideRows[index - 1], val));
+        if (index === subdivideRows.length-1) {
+          console.log(index)
+          console.log('len',classList.length)
+          console.log('subrow len', subdivideRows[index])
+          // console.log('slice',classList.slice(subdivideRows[index - 1]));
+          console.log('placeholder before', placeholder)
+          placeholder.push(classList.slice(subdivideRows[index-1]));
+          if(placeholder[placeholder.length-1].length > deskPerRow) {
+            ;
+            placeholder.push([placeholder[placeholder.length-1].pop()]);
+            console.log(placeholder[placeholder.length-1][deskPerRow])
+          }
+            console.log('placeholder after', placeholder)  
+        }
+        else if (index > 0) {
+          console.log('push', placeholder);
+          placeholder.push(classList.slice(subdivideRows[index - 1], val));
+        } 
       })
     }
     return placeholder;
@@ -183,11 +219,9 @@ export default class App extends React.Component {
   importClassList = (e) => {
     // fetch('/files/class-list-number.txt')
     // fetch('/files/class-list.txt')
-    let id = e.target.id;
-    let date = this.state.date;
-    date = date.split('/');
-    date = date.join('_');
-    let filename = id.includes('no') ? 'class-list.txt' : `class_attendance_${date}.txt`;
+    let id = e.target.id === 'no-date' ? 'no-date' : 'date';
+    let filename = e.target.id === 'no-date' ? 'class-list.txt' : document.getElementById('date').files[0].name;
+
     fetch(`/files/${filename}`)
       .then(response => response.text())
       .then(text => {
@@ -208,17 +242,25 @@ export default class App extends React.Component {
     let classroom = document.getElementById('classroom');
     let windowHeight = window.innerHeight;
     let ratio = (windowHeight / classroom.offsetHeight);
-    classroom.style.transform = `scale(${ratio},${ratio})`;
+    if (ratio <= 1) classroom.style.transform = `scale(${ratio},${ratio})`;
+    if (document.getElementsByClassName('remove-student-button').length > 0) {
+      let removeButton = Object.assign([], document.getElementsByClassName('remove-student-button'));
+      if (ratio <= 1.1) removeButton.forEach(val => {
+        val.style.transform = `scale(${ratio},${ratio})`;
+        val.style.lineHeight = `${1/ratio}`;
+        val.style.textSize = `${ratio}%`;
+      });
+    }
   }
   updateDragElement = (e) => {
-    let dragElement = parseInt(e.currentTarget.id);
+    let dragElement = typeof e === 'number' ? e : parseInt(e.currentTarget.id);
     this.setState({ dragElement })
   }
   updateOrder = (e) => {
     let oldIndex = parseInt(e.currentTarget.id) - 1;
     let newIndex = parseInt(this.state.dragOver) - 1;
 
-    let classList = this.state.classList;
+    let classList = JSON.parse(JSON.stringify(this.state.classList));
     classList.map((desk, index) => desk.order = index + 1);
 
     let updatedClasslist = classList;
@@ -244,7 +286,7 @@ export default class App extends React.Component {
       }
       updatedClasslist.map((desk, index) => desk.order = (index + 1));
     }
-    this.setState({ classList: updatedClasslist });
+    this.setState({ classList: updatedClasslist, classListModified: 'Yes' });
   }
   changeAttendanceStatus = (e) => {
     let index = parseInt(e.target.id) - 1;
@@ -258,14 +300,19 @@ export default class App extends React.Component {
     let todaysAttendance = this.updateAttendance(attendanceArr, todaysIndex, 'change-status');
 
     //Track Changes to Attendance Between Submissions - for Random Number Genrator No Repeat
-    let changeInAttendance = this.state.changeInAttendance;
-    changeInAttendance.push({
-      name: classList[index].name,
-      present: todaysAttendance.present
-    });
+    let changeInAttendance = JSON.parse(JSON.stringify(this.state.changeInAttendance));
+    const pushToArray = () => {
+      changeInAttendance.push({
+        name: classList[index].name,
+        present: todaysAttendance.present
+      });
+    }
+    const removeFromArray = () => {
+      return changeInAttendance = changeInAttendance.filter(student => student.name !== classList[index].name);
+    }
+    changeInAttendance.some(student => student.name === classList[index].name) ? removeFromArray() : pushToArray();
     todaysIndex === -1 ? attendanceArr.push(todaysAttendance) : attendanceArr[todaysIndex] = todaysAttendance;
-    this.setState({ classList, changeInAttendance, attendanceTaken: true })
-    // console.log('Double Clicked', classList[index]);
+    changeInAttendance.length > 0 ? this.setState({ classList, changeInAttendance, attendanceTaken: true, classListModified: 'Yes' }) : this.setState({ classList, changeInAttendance, attendanceTaken: true, classListModified: 'No' });
   }
   quickAttendanceSetAll = (originFunction = 'set-all') => {
     let classList = JSON.parse(JSON.stringify(this.state.classList));
@@ -276,7 +323,8 @@ export default class App extends React.Component {
         if (val.date === this.state.date) return todaysIndex = index;
         else return todaysIndex;
       })
-      let todaysAttendance = val.attendance[0] ? val.attendance[0] : this.updateAttendance(val.attendance, todaysIndex, originFunction);
+      // let todaysAttendance = val.attendance[0] ? val.attendance[0] : this.updateAttendance(val.attendance, todaysIndex, originFunction);
+      let todaysAttendance = this.updateAttendance(val.attendance, todaysIndex, originFunction);
       return todaysIndex === -1 ? val.attendance.push(todaysAttendance) : val.attendance[todaysIndex] = todaysAttendance;
     });
     localStorage.setItem('class-list', JSON.stringify(classList));
@@ -307,101 +355,126 @@ export default class App extends React.Component {
     }
     return todaysAttendance;
   }
-  exportAttendanceList = () => {
-    console.log("Exporting Attendance List");
+  exportAttendanceList = (e) => {
+    e.preventDefault();
+    document.getElementById(e.target.id).style.opacity = '0';
+    document.getElementById(e.target.id).disabled = true;
+    // console.log("Exporting Attendance List");
     let classList = localStorage.getItem('class-list');
     var file = new File([classList], `class_attendance_${this.state.date}.txt`, { type: "text/plain;charset=utf-8" });
     FileSaver.saveAs(file)
+    this.setState({ classListModified: 'No' });
   };
-  removeStudentFromClassList = (e) => {
+  removeConfirmation = (e) => {
     let classListIndex = parseInt(e.target.id.split('-')[0]) - 1;
-    console.log('Removing', classListIndex);
+    // console.log('Removing', classListIndex);
     let mode = 'remove-student';
     this.setState({ mode });
-    document.getElementById('app').style.webkitFilter = 'blur(2px)';
-    // Add logic to remove student
-    console.log('Confirmation pop-up will (eventuall) launch now');
-    setTimeout(() => {
-      console.log('Removing blur test');
-      document.getElementById('app').style.webkitFilter = null;
-    }, 2000);
+    document.getElementById('classroom').style.webkitFilter = 'blur(2px)';
+    this.updateDragElement(classListIndex);
+  }
+  clearConfirmation = (e) => {
+    if (e) e.stopPropagation();
+    document.getElementById('classroom').style.webkitFilter = null;
+    this.setState({ mode: 'edit' });
+  }
+  removeStudentFromClassList = () => {
+    let indexOfRemovedStudent = this.state.dragElement;
+    let classList = JSON.parse(JSON.stringify(this.state.classList));
+    classList = classList.filter((val, index) => index !== indexOfRemovedStudent);
+    this.setState({ classList });
+    localStorage.setItem('class-list', JSON.stringify(classList));
+    this.clearConfirmation()
   }
   render() {
+    let warning = {
+      color: 'red'
+    }
+    let noBold = {
+      fontWeight: 'lighter'
+    }
     return (
-      <div>
-        {this.state.mode === 'remove-child' && (
-            <div id='removal-confirmation'>
-
-            </div>
-        )}
-        <div id="app">
-          {this.state.classList.length > 0 && (
-            <div id='classroom-details'>
-              <Clock />
-              <form>
+      <div id="app">
+        {this.state.classList.length > 0 && (
+          <div id='classroom-details'>
+            <Clock />
+            <form>
+              <div>
+                <button id='toggle-edit-button' onClick={this.changeEdit}>{this.state.mode !== 'edit' || this.state.mode !== 'remove-student' ? 'Enable Edit Mode' : 'Disable Edit Mode'}</button>
+              </div>
+              {(this.state.mode === 'edit' || this.state.mode === 'remove-student') && (
                 <div>
-                  <button id='toggle-edit-button' onClick={this.changeEdit}>{this.state.mode !== 'edit' ? 'Enable Edit Mode' : 'Disable Edit Mode'}</button>
-                </div>
-                {this.state.mode === 'edit' && (
+                  <label>Number of desks per row: </label>
+                  <input id='desks-per-row' type='number' max='6' min='3' onChange={this.changeRowCount} value={this.state.deskPerRow} />
                   <div>
-                    <label>Number of desks per row: </label>
-                    <input type='number' max='6' min='3' onChange={this.changeRowCount} value={this.state.deskPerRow} />
+                    <label>Rearrange Method: {this.state.rearrange === 'swap' ? 'Swap Seats' : 'Slide Seats'} </label>
                     <div>
-                      <label>Rearrange Method: {this.state.rearrange === 'swap' ? 'Swap Seats' : 'Slide Seats'} </label>
-                      <div>
-                        <button onClick={this.changeRearrangeType}>{this.state.rearrange === 'swap' ? 'Change to Slide Method' : 'Change to Swap Method'}</button>
-                      </div>
+                      <button onClick={this.changeRearrangeType}>{this.state.rearrange === 'swap' ? 'Change to Slide Method' : 'Change to Swap Method'}</button>
                     </div>
                   </div>
-                )}
-                {this.state.mode.includes('Attendance') && (<div>
-                  <button id='toggle-quickattendance-button' onClick={this.changeQuickAttendance}>{this.state.mode !== 'quickAttendance' ? 'Enable Quick Attendance' : 'Disable Quick Attendance'}</button>
-                </div>)}
-                {this.state.mode !== 'edit' && <div>
-                  <button id='toggle-attendance-button' onClick={this.toggleAttendance}>{this.state.mode.includes('Attendance') ? 'Submit Attendance' : 'Take Attendance'}</button>
-                  {this.state.mode === 'Attendance' && <div id='attendance-notes'><p>Double click the student's name to mark them present / absent.</p><p>Or enable quick attendance for single click changes.</p></div>}
-                </div>}
-                {this.state.attendanceTaken && (<div>
-                  <button id='export-attendance-button' onClick={this.exportAttendanceList}>Export Attendance List</button>
-                </div>)}
-                {this.state.mode === '' && this.state.attendanceTaken && <RandomNameGenerator classList={this.state.classList} />}
-              </form>
-            </div>)
-          }
-          {
-            this.state.classList.length === 0 && (
-              <div id='import-button'>
-                <p>New here? Click the button to import demo data</p>
-                <button id='no-date' onClick={this.importClassList}>Import Demo Data</button>
-                <button id='date' onClick={this.importClassList}>With Previous Date Info</button>
-                <p><strong>Note: this data set is saved to local storage, but can be manually cleared from the devTools Application tab</strong></p>
+                </div>
+              )}
+              {this.state.mode.includes('Attendance') && (<div>
+                <button id='toggle-quickattendance-button' onClick={this.changeQuickAttendance}>{this.state.mode !== 'quickAttendance' ? 'Enable Quick Attendance' : 'Disable Quick Attendance'}</button>
+              </div>)}
+              {(this.state.mode !== 'edit' || this.state.mode !== 'remove-student') && <div>
+                <button id='toggle-attendance-button' onClick={this.toggleAttendance}>{this.state.mode.includes('Attendance') ? 'Submit Attendance' : 'Take Attendance'}</button>
+                {this.state.mode === 'Attendance' && <div id='attendance-notes'><p>Double click the student's name to mark them present / absent.</p><p>Or enable quick attendance for single click changes.</p></div>}
+              </div>}
+              {this.state.attendanceTaken && this.state.classListModified === 'Yes' && (<div>
+                <button id='export-attendance-button' onClick={this.exportAttendanceList}>Export Attendance List</button>
+              </div>)}
+              {this.state.mode === '' && this.state.attendanceTaken && <RandomNameGenerator classList={this.state.classList} />}
+            </form>
+          </div>)
+        }
+        {
+          this.state.classList.length === 0 && (
+            <div id='import-button'>
+              <p>New here? Click the button to import demo data</p>
+              <button id='no-date' onClick={this.importClassList}>Import Demo Data</button>
+              <p>Or choose a file with previous date info </p>
+              <input type='file' id='date' onChange={this.importClassList} />
+              <p>You can find these files within the <strong>classroom > public > files directory</strong></p>
+              <p style={warning}><strong>Note: this data set is saved to local storage, but can be manually cleared from the devTools Application tab</strong></p>
+            </div>
+          )
+        }
+        <div id='classroom'>
+          {this.state.classList.length > 0 && this.updateRows(this.state.classList, this.state.deskPerRow).map((row, rowIndex) => {
+            return (
+              <div className='row' key={`row-${rowIndex}`}>
+                {row.map((student, index) => {
+                  return <Student
+                    key={`${(this.state.deskPerRow * rowIndex) + index + 1}`}
+                    deskPerRow={this.state.deskPerRow}
+                    displayrow={rowIndex}
+                    displaydesk={index + 1}
+                    mode={this.state.mode}
+                    changeAttendanceStatus={this.changeAttendanceStatus}
+                    updateOrder={this.updateOrder}
+                    updateDragElement={this.updateDragElement}
+                    removeConfirmation={this.removeConfirmation}
+                    name={student.name}
+                    attendance={student.attendance && student.attendance[student.attendance.length - 1]}
+                  />
+                })}
               </div>
             )
-          }
-          <div id='classroom'>
-            {this.state.classList.length > 0 && this.updateRows(this.state.classList, this.state.deskPerRow).map((row, rowIndex) => {
-              return (
-                <div className='row' key={`row-${rowIndex}`}>
-                  {row.map((student, index) => {
-                    return <Student
-                      key={`${(this.state.deskPerRow * rowIndex) + index + 1}`}
-                      deskPerRow={this.state.deskPerRow}
-                      displayrow={rowIndex}
-                      displaydesk={index + 1}
-                      mode={this.state.mode}
-                      changeAttendanceStatus={this.changeAttendanceStatus}
-                      updateOrder={this.updateOrder}
-                      updateDragElement={this.updateDragElement}
-                      removeStudentFromClassList={this.removeStudentFromClassList}
-                      name={student.name}
-                      attendance={student.attendance && student.attendance[student.attendance.length - 1]}
-                    />
-                  })}
-                </div>
-              )
-            })}
+          })}
+        </div>
+        {this.state.mode === 'remove-student' && <div onClick={this.clearConfirmation} id='disable-page'></div>}
+        {this.state.mode === 'remove-student' && (
+          <div id='removal-confirmation'>
+            <h4>Are you sure you want to remove {this.state.classList[this.state.dragElement].name} from this roster?</h4>
+            <span style={noBold}>
+              <p>You can click anywhere outside of this box to cancel.</p>
+              <p style={warning}>Note: This action cannot be undone.</p>
+            </span>
+            <button id='confirm-remove' onClick={this.removeStudentFromClassList}>Remove</button><button id='confirm-cancel' onClick={this.clearConfirmation}>Cancel</button>
+            <div><button id='removal-confimation-export-button' onClick={this.exportAttendanceList}>Export class list first, just in case...</button></div>
           </div>
-        </div >
+        )}
       </div>
     );
   }

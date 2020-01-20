@@ -29,9 +29,9 @@ export default class Student extends React.Component {
         let style = this.props.mode === 'edit' ?
             { cursor: 'move' } :
             { cursor: 'default' };
-        
+
         return (
-            <div>
+            <div className='individual-desk'>
                 <h4 id={id}
                     className={this.getClass()}
 
@@ -48,7 +48,7 @@ export default class Student extends React.Component {
                     onDragStart={this.changeRemoveButtonOpacity}>
                     {this.props.name}
                 </h4>
-                {this.props.mode === 'edit' && <div onClick={this.props.removeStudentFromClassList} id={`${id}-remove`} className='remove-student-button'>x</div>}
+                {this.props.mode === 'edit' && <div onClick={this.props.removeConfirmation} id={`${id}-remove`} className='remove-student-button'>x</div>}
             </div>
         )
     }

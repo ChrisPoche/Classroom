@@ -2,6 +2,12 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  -moz-user-select: none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+  
 }
 #app {
   display: block;
@@ -46,6 +52,12 @@ body {
   text-align: center;
   margin-top: 40px;
 }
+#import-button button {
+  margin-bottom: 5px;
+}
+#import-button input {
+  width: 174px;
+}
 .attendance-present {
   background-color: rgba(0, 255, 0, .3);
 }
@@ -54,7 +66,6 @@ body {
 }
 .absent {
   opacity: 0.2;
-  /* z-index: -100; */
 }
 
 #random-name {
@@ -84,23 +95,28 @@ button {
   position: absolute;
   top: 91vh;
 }
-#no-date { 
+#no-date, #confirm-remove { 
   margin-right: 10px;
 }
+.individual-desk {
+  transform-origin: top left;
+}
 .remove-student-button {
+  transform-origin: center center;
   position: absolute;
   display: inline-block;
-  margin-left: -1vw;
-  margin-top: 1vw;
+  margin-left: -0.85vw;
+  margin-top: .6vw;
   text-align: center;
   background-color: white;
   width: 1.5vw;
   height: 1.5vw;
+  font-size: large;
   line-height: .8; /* Lowercase x lineheight: .8,  Uppercase X lineheight: 1   */
   border-radius: 50%;
   font-weight: bolder;
-  border: black 1px solid;
-  color: #aa0202;
+  border: rgba(0, 0, 0, .2) 1px solid;
+  color: rgba(0, 0, 0, .5);
   box-shadow: 2px 2px 4px rgba(0, 0, 0, .2);
   -moz-user-select: none;
    -khtml-user-select: none;
@@ -109,9 +125,35 @@ button {
    user-select: none;
    cursor: pointer;
 }
-#removal-confirmation {
+.remove-student-button:hover {
+  color: #aa0202;
 }
-#background-blur {
+#removal-confirmation {
+  border-radius: 5px;
+  position: fixed;
+  padding: 2vw 5vw 6vw;
+  top: 20vh;
+  left: 12vw;
+  width: 36vw;
+  max-width: 444px;
+  height: 20vh;
+  max-height: 170px;
+  text-align: center;
+  background-color: white;
+  border: rgba(0, 0, 0, .2) 2px solid;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, .2);
+  font-weight: bolder;
+}
+#disable-page {
   width: 100vw;
   height: 100vh;
+  position: fixed;
+  top:0;
+  left: 0;
+}
+#removal-confirmation button {
+  margin: 10px 10px;
+}
+#removal-confirmation button:hover {
+  background-color: rgba(0, 0, 0, .2);
 }
