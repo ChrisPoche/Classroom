@@ -1,28 +1,56 @@
 This is a simple classroom application. For the time being, students are hard coded in using an attached txt file with JSON formatted data.
 
 ## Planned features:
-- ~~Large clock in class details section~~
+Widgets
+- Daily announcement
+- Group students (have ability to specify students to not group) 
+- Notepad
 - Timer
+- Stoplight 
+- Work Actions (silent, work with partner, etc)
+- Dice
+- Time includes small date above (can be toggled)
+- ~~Large clock in class details section~~
 - ~~Random Name Generator~~
   - ~~Random Name Generator only chooses students with a status of present~~
   - Add spinner, random desk cycling animation
-  - Click on randomly generated name, to highlight the student's desk  
-- Expand to have multiple classrooms, with searchable dashboard
-- ~~Take Attendance Mode: Double click student to change attendance status~~
-- ~~Quick Attendance Mode: All students are marked present, can be selected / deselected with single click~~
-- Click on student's chiclet to see more options (profile, grades, attendance, etc.)
-- Enable (full) touch screen compatability
-- Improve dynamic scaling on all objects
-- Enable ability to rotate the screen for longer seating charts  
-- Improve fluidity of drag and drop funcitonality without third-party library
-- Add students to classroom
-- ~~Remove students from classroom~~ 
-- Expand classroom details section
+  - Click on randomly generated name, to highlight the student's desk
 - Toolbox / Widget drawer, that teachers can drag and drop into their classroom details section (timer, random name generator, games)
+
+
+Main Panel
+- Seating Chart
+  - ~~Take Attendance Mode: Double click student to change attendance status~~
+  - ~~Quick Attendance Mode: All students are marked present, can be selected / deselected with single click~~
+  - Click on student's chiclet to see more options (profile, grades, attendance, etc.)
+  - Assign blank desk
+  - Lasso desks to work together
+  - Desk SVG with students name on desk, allowing seat orientation, rotate desks
+  - Free moving desks - save layout
+  - Customize student desks. Create lab tables for 2-4 drag and drop. Visually shows them together (same color as individual desks) to enable students to be moved
+- Student profile - attendance data over time
+  - Calendar month/week with green (present), yellow (tardy), red (absent) for each day
+  - Same calendar but for whole class instead of individual student
+- Enable PowerPoint to be uploaded and run in browser
+- Enable full screen mode of main panel
+- Add students one-by-one, or list (comma delimited, semi-colon, hard return)
 - Within Edit Mode restrict functions when locked: 
   - ~~Disabling the rearrangement of students~~ 
   - ~~Removing and~~ Adding students
+- Enable ability to rotate the screen for longer seating charts  
+- ~~Remove students from classroom~~ 
+- Classroom details section hidden in drawer
+
+Backend 
+- Expand to have multiple classrooms, with searchable dashboard
+- Create tardy threshold for present based on time attendance status has changed
+- Export PDF of Seating Chart
+- Export Excel of present, tardy, absent
+- Grace period for tardy, back up manual override (that flags it as manual override) in case forgot to take attendance on time
 - ~~Export attendance list (for testing)~~
+- Enable (full) touch screen compatability
+- Improve dynamic scaling on all objects
+
 
 ## Available Scripts
 
