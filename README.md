@@ -15,13 +15,13 @@ This is a simple classroom application. For the time being, students are hard co
 - Improve dynamic scaling on all objects
 - Enable ability to rotate the screen for longer seating charts  
 - Improve fluidity of drag and drop funcitonality without third-party library
-- Add students from classroom
+- Add students to classroom
 - ~~Remove students from classroom~~ 
 - Expand classroom details section
 - Toolbox / Widget drawer, that teachers can drag and drop into their classroom details section (timer, random name generator, games)
 - Within Edit Mode restrict functions when locked: 
   - ~~Disabling the rearrangement of students~~ 
-  - ~~Removal and~~ addition of students
+  - ~~Removing and~~ Adding students
 - ~~Export attendance list (for testing)~~
 
 ## Available Scripts
