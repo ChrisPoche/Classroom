@@ -17,11 +17,6 @@ export default class Student extends React.Component {
         document.getElementById(removeButton).style.opacity = '0';
         this.props.updateDragElement(e);
     }
-    changeRemoveButtonOpacityBack = (e) => {
-        let removeButton = `${e.target.id}-remove`;
-        document.getElementById(removeButton).style.opacity = '1';
-        this.props.updateOrder(e);
-    }
     render() {
         let rowIndex = this.props.displayrow;
         let index = this.props.displaydesk;
@@ -44,11 +39,12 @@ export default class Student extends React.Component {
                     onDoubleClick={this.props.mode !== 'quickAttendance' && this.props.mode.includes('Attendance') ? this.props.changeAttendanceStatus : this.noWhere}
 
                     draggable={this.props.mode === 'edit' ? 'true' : 'false'}
-                    onDragEnd={this.changeRemoveButtonOpacityBack}
-                    onDragStart={this.changeRemoveButtonOpacity}>
+                    onDragStart={this.changeRemoveButtonOpacity}
+                    // onDragEnd={this.changeRemoveButtonOpacityBack}
+                    >
                     {this.props.name}
                 </h4>
-                {this.props.mode === 'edit' && <div onClick={this.props.removeConfirmation} id={`${id}-remove`} className='remove-student-button'>x</div>}
+                {this.props.mode === 'edit' && <div onClick={this.props.removeConfirmation} key={`${id}-remove`} id={`${id}-remove`} className='remove-student-button'>x</div>}
             </div>
         )
     }

@@ -43,6 +43,7 @@ export default class App extends React.Component {
     })
     let classList = JSON.parse(localStorage.getItem('class-list')) || [];
     this.setState({ classList });
+
     document.addEventListener('dragover', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -51,12 +52,14 @@ export default class App extends React.Component {
       }
     })
     document.addEventListener('keydown', (e) => {
-      if (this.state.mode === 'remove-student') return this.clearConfirmation();
-      if (e.key === 's') if (this.state.mode === 'edit') this.changeRearrangeType();
-      if (e.key === 'e') this.changeEdit(e);
-      if (e.key === 'a' || e.key === 't' || e.key === 'q') {
-        this.toggleAttendance(e);
-        if (e.key === 'q') this.changeQuickAttendance(e);
+      if (this.state.classList.length > 0) {
+        if (this.state.mode === 'remove-student') return this.clearConfirmation();
+        if (e.key === 's') if (this.state.mode === 'edit') this.changeRearrangeType();
+        if (e.key === 'e') this.changeEdit(e);
+        if (e.key === 'a' || e.key === 't' || e.key === 'q') {
+          this.toggleAttendance(e);
+          if (e.key === 'q') this.changeQuickAttendance(e);
+        }
       }
     })
   }
@@ -88,6 +91,9 @@ export default class App extends React.Component {
         dragElement.style.backgroundColor = '';
         let dragOver = document.getElementById(this.state.dragOver)
         dragOver.style.backgroundColor = '';
+        let removeButton = document.getElementById(`${e.target.id}-remove`);
+        removeButton.style.opacity = 1;
+        this.updateOrder(e)
         this.showChangedDesks(parseInt(dragElement.id), parseInt(dragOver.id));
       })
     }
@@ -221,12 +227,14 @@ export default class App extends React.Component {
         let date = new Date();
         date = date.toLocaleDateString();
         let classList = JSON.parse(text);
-        classList.map(desk => {
-          let last = desk.attendance.length - 1;
-          return desk.attendance = desk.attendance[last].date.includes(this.state.date) ? [...desk.attendance] : [...desk.attendance, { date, present: -1, statusLastModified: '' }];
+        classList.map((desk, index) => {
+          let last = desk.attendance ? desk.attendance.length - 1 : 0;
+          desk.order = desk.attendance ? desk.attendance[last].date.includes(this.state.date) ? desk.order : index + 1 : index + 1;
+          desk.attendance = desk.attendance ? desk.attendance[last].date.includes(this.state.date) ? [...desk.attendance] : [{ date, present: -1, statusLastModified: '' }] : [{ date, present: -1, statusLastModified: '' }];
+          return desk;
         });
         this.setState({ classList })
-        let today = classList.some(student => student.attendance[student.attendance.length-1].present !== -1 && this.state.date === student.attendance[student.attendance.length-1].date ? true : false); 
+        let today = classList.some(student => student.attendance[student.attendance.length - 1].present !== -1 && this.state.date === student.attendance[student.attendance.length - 1].date ? true : false);
         console.log(today);
         if (today && !id.includes('no')) {
           this.toggleAttendance();
@@ -253,11 +261,11 @@ export default class App extends React.Component {
     this.setState({ dragElement })
   }
   updateOrder = (e) => {
-    let oldIndex = parseInt(e.currentTarget.id) - 1;
+    let oldIndex = parseInt(this.state.dragElement) - 1;
     let newIndex = parseInt(this.state.dragOver) - 1;
 
     let classList = JSON.parse(JSON.stringify(this.state.classList));
-    classList.map((desk, index) => desk.order = index + 1);
+    // classList.map((desk, index) => desk.order = index + 1);
 
     let updatedClasslist = classList;
 
