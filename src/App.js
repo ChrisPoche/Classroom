@@ -51,6 +51,7 @@ export default class App extends React.Component {
       }
     })
     document.addEventListener('keydown', (e) => {
+      if (this.state.mode === 'remove-student') return this.clearConfirmation();
       if (e.key === 's') if (this.state.mode === 'edit') this.changeRearrangeType();
       if (e.key === 'e') this.changeEdit(e);
       if (e.key === 'a' || e.key === 't' || e.key === 'q') {
@@ -157,13 +158,12 @@ export default class App extends React.Component {
   }
   toggleAttendance = (e) => {
     if (e) e.preventDefault();
-    let mode = this.state.mode.includes('Attendance') ? '' : 'Attendance'
+    let mode = e?.key === 'q' ? 'Attendance' : this.state.mode.includes('Attendance') ? '' : 'Attendance'
     this.setState({ mode });
     if (mode === '') {
       let classList = this.quickAttendanceSetAll('submit-attendance');
       let absent = document.getElementsByClassName('attendance-absent') || [];
       absent = [...absent];
-      // console.log(absent);
       absent.forEach((desk, index) => {
         let student = document.getElementById(desk.id);
         student.className = 'desk absent';
@@ -192,26 +192,17 @@ export default class App extends React.Component {
     if (classList.length > 0) {
       let subdivideRows = [...Array(classList.length).keys()];
       subdivideRows = subdivideRows.filter(val => val % numberOfRows === 0 || val === classList.length - 1);
-      console.log(subdivideRows);
       subdivideRows.forEach((val, index) => {
-        if (index === subdivideRows.length-1) {
-          console.log(index)
-          console.log('len',classList.length)
-          console.log('subrow len', subdivideRows[index])
-          // console.log('slice',classList.slice(subdivideRows[index - 1]));
-          console.log('placeholder before', placeholder)
-          placeholder.push(classList.slice(subdivideRows[index-1]));
-          if(placeholder[placeholder.length-1].length > deskPerRow) {
+        if (index === subdivideRows.length - 1) {
+          placeholder.push(classList.slice(subdivideRows[index - 1]));
+          if (placeholder[placeholder.length - 1].length > deskPerRow) {
             ;
-            placeholder.push([placeholder[placeholder.length-1].pop()]);
-            console.log(placeholder[placeholder.length-1][deskPerRow])
+            placeholder.push([placeholder[placeholder.length - 1].pop()]);
           }
-            console.log('placeholder after', placeholder)  
         }
         else if (index > 0) {
-          console.log('push', placeholder);
           placeholder.push(classList.slice(subdivideRows[index - 1], val));
-        } 
+        }
       })
     }
     return placeholder;
@@ -219,8 +210,10 @@ export default class App extends React.Component {
   importClassList = (e) => {
     // fetch('/files/class-list-number.txt')
     // fetch('/files/class-list.txt')
+
     let id = e.target.id === 'no-date' ? 'no-date' : 'date';
     let filename = e.target.id === 'no-date' ? 'class-list.txt' : document.getElementById('date').files[0].name;
+
 
     fetch(`/files/${filename}`)
       .then(response => response.text())
@@ -228,11 +221,14 @@ export default class App extends React.Component {
         let date = new Date();
         date = date.toLocaleDateString();
         let classList = JSON.parse(text);
-        classList.map(desk => desk.attendance ? desk.attendance = [{ date: this.state.date, present: desk.attendance[0].present, statusLastModified: `${this.state.date},${desk.attendance[0].statusLastModified.split(',')[1]}` }] : desk.attendance = [{ date, present: -1, statusLastModified: '' }]);
-        classList.map((desk, index) => desk.order ? desk.order : desk.order = index + 1);
-        let { attendance } = classList[0];
+        classList.map(desk => {
+          let last = desk.attendance.length - 1;
+          return desk.attendance = desk.attendance[last].date.includes(this.state.date) ? [...desk.attendance] : [...desk.attendance, { date, present: -1, statusLastModified: '' }];
+        });
         this.setState({ classList })
-        if (attendance.present !== -1 && !id.includes('no')) {
+        let today = classList.some(student => student.attendance[student.attendance.length-1].present !== -1 && this.state.date === student.attendance[student.attendance.length-1].date ? true : false); 
+        console.log(today);
+        if (today && !id.includes('no')) {
           this.toggleAttendance();
           this.toggleAttendance();
         }
@@ -247,7 +243,7 @@ export default class App extends React.Component {
       let removeButton = Object.assign([], document.getElementsByClassName('remove-student-button'));
       if (ratio <= 1.1) removeButton.forEach(val => {
         val.style.transform = `scale(${ratio},${ratio})`;
-        val.style.lineHeight = `${1/ratio}`;
+        val.style.lineHeight = `${1 / ratio}`;
         val.style.textSize = `${ratio}%`;
       });
     }
@@ -318,13 +314,13 @@ export default class App extends React.Component {
     let classList = JSON.parse(JSON.stringify(this.state.classList));
     classList.map((val, index) => {
       let arr = val.attendance;
+      let last = arr.length;
       let todaysIndex = -1;
       arr.filter((val, index) => {
         if (val.date === this.state.date) return todaysIndex = index;
         else return todaysIndex;
       })
-      // let todaysAttendance = val.attendance[0] ? val.attendance[0] : this.updateAttendance(val.attendance, todaysIndex, originFunction);
-      let todaysAttendance = this.updateAttendance(val.attendance, todaysIndex, originFunction);
+      let todaysAttendance = val.attendance[last] ? val.attendance[last] : this.updateAttendance(val.attendance, todaysIndex, originFunction);
       return todaysIndex === -1 ? val.attendance.push(todaysAttendance) : val.attendance[todaysIndex] = todaysAttendance;
     });
     localStorage.setItem('class-list', JSON.stringify(classList));
@@ -359,7 +355,6 @@ export default class App extends React.Component {
     e.preventDefault();
     document.getElementById(e.target.id).style.opacity = '0';
     document.getElementById(e.target.id).disabled = true;
-    // console.log("Exporting Attendance List");
     let classList = localStorage.getItem('class-list');
     var file = new File([classList], `class_attendance_${this.state.date}.txt`, { type: "text/plain;charset=utf-8" });
     FileSaver.saveAs(file)
@@ -367,7 +362,6 @@ export default class App extends React.Component {
   };
   removeConfirmation = (e) => {
     let classListIndex = parseInt(e.target.id.split('-')[0]) - 1;
-    // console.log('Removing', classListIndex);
     let mode = 'remove-student';
     this.setState({ mode });
     document.getElementById('classroom').style.webkitFilter = 'blur(2px)';
@@ -386,6 +380,10 @@ export default class App extends React.Component {
     localStorage.setItem('class-list', JSON.stringify(classList));
     this.clearConfirmation()
   }
+  clearlocalStorage = () => {
+    localStorage.clear();
+    window.location.reload();
+  }
   render() {
     let warning = {
       color: 'red'
@@ -398,9 +396,10 @@ export default class App extends React.Component {
         {this.state.classList.length > 0 && (
           <div id='classroom-details'>
             <Clock />
+            <button onClick={this.clearlocalStorage}>Clear Local Storage</button>
             <form>
               <div>
-                <button id='toggle-edit-button' onClick={this.changeEdit}>{this.state.mode !== 'edit' || this.state.mode !== 'remove-student' ? 'Enable Edit Mode' : 'Disable Edit Mode'}</button>
+                <button id='toggle-edit-button' onClick={this.changeEdit}>{this.state.mode !== 'edit' && this.state.mode !== 'remove-student' ? 'Enable Edit Mode' : 'Disable Edit Mode'}</button>
               </div>
               {(this.state.mode === 'edit' || this.state.mode === 'remove-student') && (
                 <div>
@@ -468,7 +467,7 @@ export default class App extends React.Component {
           <div id='removal-confirmation'>
             <h4>Are you sure you want to remove {this.state.classList[this.state.dragElement].name} from this roster?</h4>
             <span style={noBold}>
-              <p>You can click anywhere outside of this box to cancel.</p>
+              <p>You can press and key or click outside of this box to cancel.</p>
               <p style={warning}>Note: This action cannot be undone.</p>
             </span>
             <button id='confirm-remove' onClick={this.removeStudentFromClassList}>Remove</button><button id='confirm-cancel' onClick={this.clearConfirmation}>Cancel</button>

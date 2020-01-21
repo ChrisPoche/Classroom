@@ -53,3 +53,15 @@ export default class Student extends React.Component {
         )
     }
 }
+
+
+// {this.props.mode === 'edit' && (
+//     <div className='remove-student-button' >
+//         <img
+//             id={`${id}-remove`}
+//             src='/files/remove-button.svg'
+//             alt='x'
+//             onClick={this.props.removeConfirmation}
+//             className='remove-button'
+//         />
+//     </div>)}
