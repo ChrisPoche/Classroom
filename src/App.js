@@ -21,7 +21,8 @@ export default class App extends React.Component {
       attendanceTaken,
       classList,
       changeInAttendance: [],
-      classListModified: 'No',
+      classListModified: 'Yes',
+      // classListModified: 'No',
       importedList: false,
       deskPerRow: 6,
       dragOver: -1,
@@ -213,29 +214,29 @@ export default class App extends React.Component {
     }
     return placeholder;
   }
+  // importClassList = (e, filename = 'class_attendance_1_20_2020.txt') => {
   importClassList = (e) => {
-    // fetch('/files/class-list-number.txt')
-    // fetch('/files/class-list.txt')
-
-    let id = e.target.id === 'no-date' ? 'no-date' : 'date';
+    let id = e.target?.id === 'no-date' ? 'no-date' : 'date';
     let filename = e.target.id === 'no-date' ? 'class-list.txt' : document.getElementById('date').files[0].name;
-
-
     fetch(`/files/${filename}`)
       .then(response => response.text())
       .then(text => {
         let date = new Date();
         date = date.toLocaleDateString();
         let classList = JSON.parse(text);
-        classList.map((desk, index) => {
-          let last = desk.attendance ? desk.attendance.length - 1 : 0;
-          desk.order = desk.attendance ? desk.attendance[last].date.includes(this.state.date) ? desk.order : index + 1 : index + 1;
-          desk.attendance = desk.attendance ? desk.attendance[last].date.includes(this.state.date) ? [...desk.attendance] : [{ date, present: -1, statusLastModified: '' }] : [{ date, present: -1, statusLastModified: '' }];
-          return desk;
+        classList = classList.map((desk, index) => {
+          let name = desk.name;
+          let last = desk.attendance && desk.attendance.length - 1;
+          let order = desk.attendance ? desk.attendance[last].date.includes(this.state.date) ? desk.order : index + 1 : index + 1;
+          let attendance = desk.attendance ? [...desk.attendance] : [];
+          if (desk.attendance) if (!desk.attendance[last].date.includes(this.state.date)) attendance.push({ date, present: -1, statusLastModified: '' });
+          else attendance = [{ date, present: -1, statusLastModified: '' }];
+          let newDesk = {name, order, attendance};
+          return newDesk;
         });
         this.setState({ classList })
         let today = classList.some(student => student.attendance[student.attendance.length - 1].present !== -1 && this.state.date === student.attendance[student.attendance.length - 1].date ? true : false);
-        console.log(today);
+        // console.log(today);
         if (today && !id.includes('no')) {
           this.toggleAttendance();
           this.toggleAttendance();
@@ -359,15 +360,6 @@ export default class App extends React.Component {
     }
     return todaysAttendance;
   }
-  exportAttendanceList = (e) => {
-    e.preventDefault();
-    document.getElementById(e.target.id).style.opacity = '0';
-    document.getElementById(e.target.id).disabled = true;
-    let classList = localStorage.getItem('class-list');
-    var file = new File([classList], `class_attendance_${this.state.date}.txt`, { type: "text/plain;charset=utf-8" });
-    FileSaver.saveAs(file)
-    this.setState({ classListModified: 'No' });
-  };
   removeConfirmation = (e) => {
     let classListIndex = parseInt(e.target.id.split('-')[0]) - 1;
     let mode = 'remove-student';
@@ -392,6 +384,66 @@ export default class App extends React.Component {
     localStorage.clear();
     window.location.reload();
   }
+  // exportFile = (e) => {
+  //   e.preventDefault();
+  //   let exportButton = document.getElementById(e.target.id);
+  //   exportButton.style.opacity = '0';
+  //   exportButton.disabled = true;
+  //   let classList = JSON.parse(localStorage.getItem('class-list'));
+  //   let csvText = 'Name,\r\n';
+
+  //   let earliestDate = new Date();
+  //   let latestDate = new Date();
+
+  //   classList.forEach(student => {
+  //     student.attendance.forEach(record => {
+  //       // console.log('Date',record.date)
+  //       // console.log('Date new Date',new Date(record.date))
+  //       // console.log('Date Local String',new Date(record.date).toLocaleDateString())
+  //       let newDate = new Date(record.date);
+  //       if (newDate < earliestDate) earliestDate = newDate;
+  //       if (newDate > latestDate) latestDate = newDate;
+  //       console.log('earliestDate',earliestDate)
+  //       console.log('latestDate',latestDate)
+  //     });
+  //     return
+  //     csvText += student.name;
+  //     student.attendance.forEach(date => csvText += date.present);
+
+
+
+  //     student.attendance.forEach(date => csvText += date.present);
+  //     csvText += '\r\n';
+  //     console.log(csvText);
+  //   });
+  //   // Get Date Range
+  //   let range = [earliestDate.toLocaleDateString()];
+  //   let date = earliestDate;
+
+  //   while (date < latestDate) {
+  //     range.push(new Date(date.setDate(date.getDate() + 1)));
+  //     console.log(range);
+  //   }
+
+
+  //   console.log(earliestDate);
+  //   console.log(new Date(date.setDate(date.getDate() + 1)));
+
+  //   // console.log(classList);
+  //   return
+  //   var file = new File([classList], `class_attendance_${this.state.date}.txt`, { type: "text/plain;charset=utf-8" });
+  //   FileSaver.saveAs(file)
+  //   this.setState({ classListModified: 'No' });
+  // }
+  exportAttendanceList = (e) => {
+    e.preventDefault();
+    document.getElementById(e.target.id).style.opacity = '0';
+    document.getElementById(e.target.id).disabled = true;
+    let classList = localStorage.getItem('class-list');
+    var file = new File([classList], `class_attendance_${this.state.date}.txt`, { type: "text/plain;charset=utf-8" });
+    FileSaver.saveAs(file)
+    this.setState({ classListModified: 'No' });
+  };
   render() {
     let warning = {
       color: 'red'
@@ -429,7 +481,8 @@ export default class App extends React.Component {
                 {this.state.mode === 'Attendance' && <div id='attendance-notes'><p>Double click the student's name to mark them present / absent.</p><p>Or enable quick attendance for single click changes.</p></div>}
               </div>}
               {this.state.attendanceTaken && this.state.classListModified === 'Yes' && (<div>
-                <button id='export-attendance-button' onClick={this.exportAttendanceList}>Export Attendance List</button>
+                <button id='export-attendance-button' className='export' onClick={this.exportAttendanceList}>Export Attendance List</button>
+                <button id='export-csv' className='export' onClick={this.exportFile}>Export Attendance List as CSV</button>
               </div>)}
               {this.state.mode === '' && this.state.attendanceTaken && <RandomNameGenerator classList={this.state.classList} />}
             </form>

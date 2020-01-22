@@ -91,10 +91,6 @@ button {
   width: 80%;
   margin-top: 0;
 }
-#export-attendance-button {
-  position: absolute;
-  top: 91vh;
-}
 #no-date, #confirm-remove { 
   margin-right: 10px;
 }
@@ -184,4 +180,11 @@ button {
 }
 #removal-confirmation button:hover {
   background-color: rgba(0, 0, 0, .2);
+}
+.export { 
+  position: absolute;
+  top: 91vh;
+}
+#export-attendance-button {
+  top: 85vh;
 }
