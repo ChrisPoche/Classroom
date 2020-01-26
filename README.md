@@ -45,7 +45,7 @@ Backend
 - Expand to have multiple classrooms, with searchable dashboard
 - Create tardy threshold for present based on time attendance status has changed
 - Export PDF of Seating Chart
-- Export Excel of ~~present,~~ tardy~~, absent~~
+- Export Excel of ~~present,~~ tardy ~~absent~~
 - Grace period for tardy, back up manual override (that flags it as manual override) in case forgot to take attendance on time
 - ~~Export attendance list (for testing)~~
 - Enable (full) touch screen compatability
