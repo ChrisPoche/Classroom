@@ -30,7 +30,7 @@ export default class RandomNameGenerator extends React.Component {
     grabName = (e) => {
         if (typeof e !== 'string') e.preventDefault();
         if (typeof e === 'string') {
-            console.log(e)
+            // console.log(e)
             let target = {
                 id: e
             }

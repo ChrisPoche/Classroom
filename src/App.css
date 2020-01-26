@@ -183,8 +183,14 @@ button {
 }
 .export { 
   position: absolute;
-  top: 91vh;
+  top: 87vh;
 }
 #export-attendance-button {
-  top: 85vh;
+  top: 81vh;
+}
+.export-csv {
+  margin-bottom: 0;
+}
+#export-csv-all {
+  display: block;
 }

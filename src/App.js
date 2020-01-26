@@ -21,29 +21,40 @@ export default class App extends React.Component {
       attendanceTaken,
       classList,
       changeInAttendance: [],
-      classListModified: 'Yes',
-      // classListModified: 'No',
+      // classListModified: 'Yes',
+      classListModified: 'No',
       importedList: false,
       deskPerRow: 6,
       dragOver: -1,
       dragElement: '',
       rearrange: 'swap',
       date,
-      mode: '' // edit 
+      mode: '', // edit
+      // functionTracking: true,
+      functionTracking: false,
+      functionTrackingStyle: 'font-weight:bolder; font-size:medium; text-decoration: underline; color:green;',
+      functionTrackingStyleReturn: 'font-weight:bolder; font-size:medium; text-decoration: underline; color:red;'
     }
 
     this.changeAttendanceStatus = this.changeAttendanceStatus.bind(this);
     this.updateOrder = this.updateOrder.bind(this);
     this.updateDragElement = this.updateDragElement.bind(this);
     this.removeConfirmation = this.removeConfirmation.bind(this);
+
+    if (this.state.functionTracking) console.log('%cState Created', this.state.functionTrackingStyle);
   }
   componentDidMount = () => {
+    // if (this.state.functionTracking) console.log('Did Mount', this.state.classList[0].attendance)
     this.getClassroomScale();
+    if (this.state.functionTracking) console.log('%cReturn to Did Mount', this.state.functionTrackingStyleReturn);
     window.addEventListener('resize', () => {
       this.getClassroomScale();
+      if (this.state.functionTracking) console.log('%cReturn to Did Mount', this.state.functionTrackingStyleReturn);
     })
     let classList = JSON.parse(localStorage.getItem('class-list')) || [];
-    this.setState({ classList });
+    this.checkDate(classList);
+    if (this.state.functionTracking) console.log('%cReturn to Did Mount', this.state.functionTrackingStyleReturn);
+    // if (this.state.functionTracking) console.log('ClassList',this.state.classList)
 
     document.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -61,16 +72,33 @@ export default class App extends React.Component {
           this.toggleAttendance(e);
           if (e.key === 'q') this.changeQuickAttendance(e);
         }
+        if (this.state.functionTracking) console.log('%cReturn to Did Mount', this.state.functionTrackingStyleReturn);
       }
     })
   }
   componentDidUpdate = (prevProps, prevState) => {
+    if (this.state.functionTracking) console.log('%cComponent Did Update', this.state.functionTrackingStyle);
     if (!this.state.importedList) {
-      localStorage.setItem('class-list', JSON.stringify(this.state.classList));
-      this.setState({ importedList: true });
+      // localStorage.setItem('class-list', JSON.stringify(this.state.classList));
+      // this.setState({ importedList: true });
+    }
+    for (let val in this.state) {
+      if (this.state.functionTracking) {
+        if (this.state[val] !== prevState[val]) {
+          console.log(`%cState Value: %c${val}`, 'color: black; font-weight: bold', 'color: red; font-weight: bolder;');
+          console.log('PrevState', prevState[val][0].attendance);
+          console.log('this.State', this.state[val][0].attendance);
+          if (prevState[val][0].attendance === this.state[val][0].attendance) {
+            console.log('PrevState', prevState[val]);
+            console.log('this.State', this.state[val]);
+          }
+        }
+      }
     }
 
     this.getClassroomScale();
+    if (this.state.functionTracking) console.log('%cReturn to Component Did Update', this.state.functionTrackingStyleReturn);
+
 
     if (this.state.changeInAttendance) if (this.state.changeInAttendance.length > 0 && this.state.classListModified === 'Yes') {
       document.getElementById('export-attendance-button').style.opacity = '1'
@@ -95,7 +123,9 @@ export default class App extends React.Component {
         let removeButton = document.getElementById(`${e.target.id}-remove`);
         removeButton.style.opacity = 1;
         this.updateOrder(e)
+        if (this.state.functionTracking) console.log('%cComponent Did Update', this.state.functionTrackingStyle);
         this.showChangedDesks(parseInt(dragElement.id), parseInt(dragOver.id));
+        if (this.state.functionTracking) console.log('%cComponent Did Update', this.state.functionTrackingStyle);
       })
     }
 
@@ -108,6 +138,7 @@ export default class App extends React.Component {
       if (this.state.dragOver !== -1) document.getElementById(this.state.dragOver).style.backgroundColor = '';
       if (prevState.classList.length > 0 && prevState.classList !== this.state.classList) {
         this.showChangedDesks();
+        if (this.state.functionTracking) console.log('%cComponent Did Update', this.state.functionTrackingStyle);
       }
     }
     if (this.state.mode === 'remove-student') {
@@ -120,6 +151,7 @@ export default class App extends React.Component {
 
   }
   showChangedDesks = (dragElement, dragOver) => {
+    if (this.state.functionTracking) console.log('%cShow Changed Desks', this.state.functionTrackingStyle);
     this.state.classList.filter(desk => {
       return this.state.rearrange === 'swap' ?
         (desk.order === dragElement || desk.order === dragOver) :
@@ -142,20 +174,26 @@ export default class App extends React.Component {
     });
   }
   changeRowCount = (e) => {
+    if (this.state.functionTracking) console.log('%cChange Row Count', this.state.functionTrackingStyle);
     e.stopPropagation();
     this.setState({ deskPerRow: e.target.value });
     this.updateRows(this.state.classList, e.target.value);
+    if (this.state.functionTracking) console.log('%cReturn to Change Row Count', this.state.functionTrackingStyleReturn);
   }
   changeRearrangeType = (e) => {
+    if (this.state.functionTracking) console.log('%cChange Rearrange Type', this.state.functionTrackingStyle);
     if (e) e.preventDefault();
     this.setState({ rearrange: this.state.rearrange === 'swap' ? 'slide' : 'swap' });
   }
   changeQuickAttendance = (e) => {
+    if (this.state.functionTracking) console.log('%cChange Quick Attendance', this.state.functionTrackingStyle);
     e.preventDefault();
     this.setState({ mode: this.state.mode !== 'quickAttendance' ? 'quickAttendance' : 'Attendance' });
     this.quickAttendanceSetAll('set-all');
+    if (this.state.functionTracking) console.log('%cReturn to Change Quick Attendance', this.state.functionTrackingStyleReturn);
   }
   changeEdit = (e) => {
+    if (this.state.functionTracking) console.log('%cChange Edit', this.state.functionTrackingStyle);
     e.preventDefault();
     let mode = this.state.mode !== 'edit' ? 'edit' : '';
     this.setState({ mode });
@@ -164,6 +202,7 @@ export default class App extends React.Component {
     }, 200);
   }
   toggleAttendance = (e) => {
+    if (this.state.functionTracking) console.log('%cToggle Attendance', this.state.functionTrackingStyle);
     if (e) e.preventDefault();
     let mode = e?.key === 'q' ? 'Attendance' : this.state.mode.includes('Attendance') ? '' : 'Attendance'
     this.setState({ mode });
@@ -194,6 +233,8 @@ export default class App extends React.Component {
     }
   }
   updateRows = (classList, deskPerRow) => {
+    if (this.state.functionTracking) console.log('%cUpdate Rows', this.state.functionTrackingStyle);
+    // if (this.state.functionTracking) console.log(classList[0]);
     let placeholder = [];
     let numberOfRows = deskPerRow || 4;
     if (classList.length > 0) {
@@ -216,34 +257,47 @@ export default class App extends React.Component {
   }
   // importClassList = (e, filename = 'class_attendance_1_20_2020.txt') => {
   importClassList = (e) => {
+    if (this.state.functionTracking) console.log('%cImport Class List', this.state.functionTrackingStyle);
     let id = e.target?.id === 'no-date' ? 'no-date' : 'date';
     let filename = e.target.id === 'no-date' ? 'class-list.txt' : document.getElementById('date').files[0].name;
     fetch(`/files/${filename}`)
       .then(response => response.text())
       .then(text => {
-        let date = new Date();
-        date = date.toLocaleDateString();
         let classList = JSON.parse(text);
-        classList = classList.map((desk, index) => {
-          let name = desk.name;
-          let last = desk.attendance && desk.attendance.length - 1;
-          let order = desk.attendance ? desk.attendance[last].date.includes(this.state.date) ? desk.order : index + 1 : index + 1;
-          let attendance = desk.attendance ? [...desk.attendance] : [];
-          if (desk.attendance) if (!desk.attendance[last].date.includes(this.state.date)) attendance.push({ date, present: -1, statusLastModified: '' });
-          else attendance = [{ date, present: -1, statusLastModified: '' }];
-          let newDesk = {name, order, attendance};
-          return newDesk;
-        });
-        this.setState({ classList })
+        this.checkDate(classList);
+        if (this.state.functionTracking) console.log('%cReturn to Import Class List', this.state.functionTrackingStyleReturn);
         let today = classList.some(student => student.attendance[student.attendance.length - 1].present !== -1 && this.state.date === student.attendance[student.attendance.length - 1].date ? true : false);
         // console.log(today);
         if (today && !id.includes('no')) {
           this.toggleAttendance();
+          if (this.state.functionTracking) console.log('%cReturn to Import Class List', this.state.functionTrackingStyleReturn);
           this.toggleAttendance();
+          if (this.state.functionTracking) console.log('%cReturn to Import Class List', this.state.functionTrackingStyleReturn);
         }
       });
   }
+  checkDate = (classList) => {
+    if (this.state.functionTracking) console.log('%cCheck Date', this.state.functionTrackingStyle);
+    // if (this.state.functionTracking) console.log(classList[0].attendance);
+    let date = new Date();
+    date = date.toLocaleDateString();
+    classList = classList.map((desk, index) => {
+      let name = desk.name;
+      let last = desk.attendance && desk.attendance.length - 1;
+      let order = desk.attendance ? desk.attendance[last].date.includes(this.state.date) ? desk.order : index + 1 : index + 1;
+      let attendance = desk.attendance ? [...desk.attendance] : [];
+      if (desk.attendance) {
+        if (!desk.attendance[last].date.includes(this.state.date)) attendance.push({ date, present: -1, statusLastModified: '' });
+      }
+      else attendance = [{ date, present: -1, statusLastModified: '' }];
+      let newDesk = { name, order, attendance };
+      return newDesk;
+    });
+    this.setState({ classList })
+    // if (this.state.functionTracking) console.log(classList[0].attendance);
+  };
   getClassroomScale = () => {
+    if (this.state.functionTracking) console.log('%cGet Classroom Scale', this.state.functionTrackingStyle);
     let classroom = document.getElementById('classroom');
     let windowHeight = window.innerHeight;
     let ratio = (windowHeight / classroom.offsetHeight);
@@ -258,10 +312,12 @@ export default class App extends React.Component {
     }
   }
   updateDragElement = (e) => {
+    if (this.state.functionTracking) console.log('%cUpdate Drag Element', this.state.functionTrackingStyle);
     let dragElement = typeof e === 'number' ? e : parseInt(e.currentTarget.id);
     this.setState({ dragElement })
   }
   updateOrder = (e) => {
+    if (this.state.functionTracking) console.log('%cUpdate Order', this.state.functionTrackingStyle);
     let oldIndex = parseInt(this.state.dragElement) - 1;
     let newIndex = parseInt(this.state.dragOver) - 1;
 
@@ -294,6 +350,7 @@ export default class App extends React.Component {
     this.setState({ classList: updatedClasslist, classListModified: 'Yes' });
   }
   changeAttendanceStatus = (e) => {
+    if (this.state.functionTracking) console.log('%cChange Attendance Status', this.state.functionTrackingStyle);
     let index = parseInt(e.target.id) - 1;
     let classList = JSON.parse(JSON.stringify(this.state.classList));
     let attendanceArr = classList[index].attendance || [];
@@ -303,6 +360,7 @@ export default class App extends React.Component {
       else return false;
     })
     let todaysAttendance = this.updateAttendance(attendanceArr, todaysIndex, 'change-status');
+    if (this.state.functionTracking) console.log('%cReturn to Change Attendance Status', this.state.functionTrackingStyleReturn);
 
     //Track Changes to Attendance Between Submissions - for Random Number Genrator No Repeat
     let changeInAttendance = JSON.parse(JSON.stringify(this.state.changeInAttendance));
@@ -320,6 +378,7 @@ export default class App extends React.Component {
     changeInAttendance.length > 0 ? this.setState({ classList, changeInAttendance, attendanceTaken: true, classListModified: 'Yes' }) : this.setState({ classList, changeInAttendance, attendanceTaken: true, classListModified: 'No' });
   }
   quickAttendanceSetAll = (originFunction = 'set-all') => {
+    if (this.state.functionTracking) console.log('%cQuick Attendance Set All', this.state.functionTrackingStyle);
     let classList = JSON.parse(JSON.stringify(this.state.classList));
     classList.map((val, index) => {
       let arr = val.attendance;
@@ -330,6 +389,7 @@ export default class App extends React.Component {
         else return todaysIndex;
       })
       let todaysAttendance = val.attendance[last] ? val.attendance[last] : this.updateAttendance(val.attendance, todaysIndex, originFunction);
+      if (this.state.functionTracking && todaysAttendance === val.attendance[last]) console.log('%cQuick Attendance Set All', this.state.functionTrackingStyle);
       return todaysIndex === -1 ? val.attendance.push(todaysAttendance) : val.attendance[todaysIndex] = todaysAttendance;
     });
     localStorage.setItem('class-list', JSON.stringify(classList));
@@ -337,6 +397,7 @@ export default class App extends React.Component {
     if (originFunction === 'submit-attendance') return classList
   }
   updateAttendance = (student, todaysIndex, originFunction = 'submit-attendance') => {
+    if (this.state.functionTracking) console.log('%cUpdate Attendance', this.state.functionTrackingStyle);
     let date = new Date();
     let time = date.toLocaleString();
     let present;
@@ -361,81 +422,121 @@ export default class App extends React.Component {
     return todaysAttendance;
   }
   removeConfirmation = (e) => {
+    if (this.state.functionTracking) console.log('%cRemove Confirmation', this.state.functionTrackingStyleReturn);
     let classListIndex = parseInt(e.target.id.split('-')[0]) - 1;
     let mode = 'remove-student';
     this.setState({ mode });
     document.getElementById('classroom').style.webkitFilter = 'blur(2px)';
     this.updateDragElement(classListIndex);
+    if (this.state.functionTracking) console.log('%cReturn to Remove Confirmation', this.state.functionTrackingStyleReturn);
   }
   clearConfirmation = (e) => {
+    if (this.state.functionTracking) console.log('%cClear Confirmation', this.state.functionTrackingStyle);
     if (e) e.stopPropagation();
     document.getElementById('classroom').style.webkitFilter = null;
     this.setState({ mode: 'edit' });
   }
   removeStudentFromClassList = () => {
+    if (this.state.functionTracking) console.log('%cRemove Student From Class List', this.state.functionTrackingStyleReturn);
     let indexOfRemovedStudent = this.state.dragElement;
     let classList = JSON.parse(JSON.stringify(this.state.classList));
     classList = classList.filter((val, index) => index !== indexOfRemovedStudent);
     this.setState({ classList });
     localStorage.setItem('class-list', JSON.stringify(classList));
     this.clearConfirmation()
+    if (this.state.functionTracking) console.log('%cReturn to Remove Student From Class List', this.state.functionTrackingStyleReturn);
   }
   clearlocalStorage = () => {
     localStorage.clear();
     window.location.reload();
   }
-  // exportFile = (e) => {
-  //   e.preventDefault();
-  //   let exportButton = document.getElementById(e.target.id);
-  //   exportButton.style.opacity = '0';
-  //   exportButton.disabled = true;
-  //   let classList = JSON.parse(localStorage.getItem('class-list'));
-  //   let csvText = 'Name,\r\n';
+  exportFile = (e) => {
+    if (this.state.functionTracking) console.log('%cExport File', this.state.functionTrackingStyle);
+    e.preventDefault();
+    let exportRange = e.target.id;
+    let exportButton = document.getElementById(e.target.id);
+    exportButton.style.opacity = '0';
+    exportButton.disabled = true;
+    let classList = JSON.parse(localStorage.getItem('class-list'));
+    let csvText = ['Name'];
 
-  //   let earliestDate = new Date();
-  //   let latestDate = new Date();
+    let earliestDate = new Date();
+    let latestDate = new Date();
 
-  //   classList.forEach(student => {
-  //     student.attendance.forEach(record => {
-  //       // console.log('Date',record.date)
-  //       // console.log('Date new Date',new Date(record.date))
-  //       // console.log('Date Local String',new Date(record.date).toLocaleDateString())
-  //       let newDate = new Date(record.date);
-  //       if (newDate < earliestDate) earliestDate = newDate;
-  //       if (newDate > latestDate) latestDate = newDate;
-  //       console.log('earliestDate',earliestDate)
-  //       console.log('latestDate',latestDate)
-  //     });
-  //     return
-  //     csvText += student.name;
-  //     student.attendance.forEach(date => csvText += date.present);
+    if (exportRange.includes('this-week') || exportRange.includes('last-week')) {
+      let day = exportRange.includes('this-week') ? new Date(earliestDate.setDate(earliestDate.getDate())) : new Date(earliestDate.setDate(earliestDate.getDate() - 7));
+      if (exportRange.includes('last-week')) {
+        classList.forEach(student => {
+          let newDate = new Date(student.attendance[0].date)
+          if (newDate < earliestDate) earliestDate = newDate;
+        })
+      }
+      earliestDate = day.getDay() === 0 ?  new Date(day.setDate(day.getDate() - 6)) : new Date(day.setDate(day.getDate() - (day.getDay() - 1)));
+      latestDate = exportRange.includes('this-week') ? latestDate : new Date(day.setDate(earliestDate.getDate() + 4));
+    }
+    if (exportRange === 'export-csv-all') {
+      classList.forEach(student => {
+        student.attendance.forEach(record => {
+          let newDate = new Date(record.date);
+          if (newDate < earliestDate) earliestDate = newDate;
+          else if (newDate > latestDate) latestDate = newDate;
+        });
+      });
+    }
+    if (exportRange.includes('-this-month')) {
+      earliestDate = new Date(`${earliestDate.getMonth()+1}/01/${earliestDate.getFullYear()}`);
+    }
+    
+    let range = [earliestDate.toLocaleDateString()];
+    let date = earliestDate;
+    
+    while (date < latestDate) {
+      let day = new Date(date.setDate(date.getDate() + 1));
+      if (day.getDay() > 0 && day.getDay() < 6) range.push(new Date(day).toLocaleDateString());
+    }
+    
+    csvText = csvText.concat(range);
+    csvText = csvText.join() + '\r\n';
+    
+    let csv = csvText;
+    
+    for (let c = 0; c < classList.length; c++) {
+      let row = [classList[c].name];
+      for (let i = 0; i < range.length; i++) {
+        let attDates = [[], []];
+        classList[c].attendance.forEach(attendance => {
+          attDates[0].push(attendance.date);
+          attDates[1].push(attendance.present);
+        })
 
 
+        let rangeIterate = 0;
+        while (rangeIterate < range.length) {
+          if (attDates[0].indexOf(range[i]) !== -1) {
+            row.push(attDates[1][attDates[0].indexOf(range[i])] ? 'P' : 'A');
+          }
+          else if (attDates[0].indexOf(range[i]) === -1) {
+            row.push('')
+          }
+          i++;
+          rangeIterate++;
+        }
+        row += '\r\n';
+        csv += row;
+      }
+    }
 
-  //     student.attendance.forEach(date => csvText += date.present);
-  //     csvText += '\r\n';
-  //     console.log(csvText);
-  //   });
-  //   // Get Date Range
-  //   let range = [earliestDate.toLocaleDateString()];
-  //   let date = earliestDate;
-
-  //   while (date < latestDate) {
-  //     range.push(new Date(date.setDate(date.getDate() + 1)));
-  //     console.log(range);
-  //   }
-
-
-  //   console.log(earliestDate);
-  //   console.log(new Date(date.setDate(date.getDate() + 1)));
-
-  //   // console.log(classList);
-  //   return
-  //   var file = new File([classList], `class_attendance_${this.state.date}.txt`, { type: "text/plain;charset=utf-8" });
-  //   FileSaver.saveAs(file)
-  //   this.setState({ classListModified: 'No' });
-  // }
+    let text = csv;
+    console.log(text);
+    let file; 
+    if (exportRange.includes('-this-week')) file = new File([text], `class_attendance_${range[0]}-${range[range.length-1]}.csv`, { type: "text/plain;charset=utf-8" });
+    else if (exportRange.includes('-last-week')) file = new File([text], `class_attendance_${range[0]}-${range[range.length-1]}.csv`, { type: "text/plain;charset=utf-8" });
+    else if (exportRange.includes('-this-month')) file = new File([text], `class_attendance_this_month_${new Date().toString().slice(4,7)}.csv`, { type: "text/plain;charset=utf-8" });
+    else if (exportRange.includes('-all')) file = new File([text], `class_attendance_all_logged_${this.state.date}.csv`, { type: "text/plain;charset=utf-8" });
+    FileSaver.saveAs(file)
+  }
   exportAttendanceList = (e) => {
+    if (this.state.functionTracking) console.log('%cExport Attendance List', this.state.functionTrackingStyle);
     e.preventDefault();
     document.getElementById(e.target.id).style.opacity = '0';
     document.getElementById(e.target.id).disabled = true;
@@ -451,6 +552,8 @@ export default class App extends React.Component {
     let noBold = {
       fontWeight: 'lighter'
     }
+    if (this.state.functionTracking) console.log('%cRender', this.state.functionTrackingStyle);
+    // if (this.state.functionTracking) console.log('ClassList',this.state.classList)
     return (
       <div id="app">
         {this.state.classList.length > 0 && (
@@ -481,8 +584,13 @@ export default class App extends React.Component {
                 {this.state.mode === 'Attendance' && <div id='attendance-notes'><p>Double click the student's name to mark them present / absent.</p><p>Or enable quick attendance for single click changes.</p></div>}
               </div>}
               {this.state.attendanceTaken && this.state.classListModified === 'Yes' && (<div>
-                <button id='export-attendance-button' className='export' onClick={this.exportAttendanceList}>Export Attendance List</button>
-                <button id='export-csv' className='export' onClick={this.exportFile}>Export Attendance List as CSV</button>
+                <button id='export-attendance-button' className='export' onClick={this.exportAttendanceList}>Export Attendance List JSON</button>
+                <div className='export'>
+                  <button id='export-csv-all' className='export-csv' onClick={this.exportFile}>Export All Logged as CSV</button>
+                  <button id='export-csv-this-month' className='export-csv' onClick={this.exportFile}>This month</button>
+                  <button id='export-csv-this-week' className='export-csv' onClick={this.exportFile}>This week</button>
+                  <button id='export-csv-last-week' className='export-csv' onClick={this.exportFile}>Last week</button>
+                </div>
               </div>)}
               {this.state.mode === '' && this.state.attendanceTaken && <RandomNameGenerator classList={this.state.classList} />}
             </form>
