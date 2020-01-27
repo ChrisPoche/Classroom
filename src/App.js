@@ -4,6 +4,7 @@ import './App.css';
 import Student from './components/Student';
 import Clock from './components/Clock';
 import RandomNameGenerator from './components/RandomNameGenerator';
+import html2canvas from 'html2canvas'
 
 export default class App extends React.Component {
   constructor(props) {
@@ -302,6 +303,12 @@ export default class App extends React.Component {
     let windowHeight = window.innerHeight;
     let ratio = (windowHeight / classroom.offsetHeight);
     if (ratio <= 1) classroom.style.transform = `scale(${ratio},${ratio})`;
+    if (document.getElementById('roster')) {
+      let inBetween = this.state.classList.length * 4;
+      let roster = document.getElementById('roster');
+      let ratio = (windowHeight / (roster.offsetHeight + 20 + inBetween));
+      roster.style.transform = `scale(${ratio},${ratio})`;
+    }
     if (document.getElementsByClassName('remove-student-button').length > 0) {
       let removeButton = Object.assign([], document.getElementsByClassName('remove-student-button'));
       if (ratio <= 1.1) removeButton.forEach(val => {
@@ -471,7 +478,7 @@ export default class App extends React.Component {
           if (newDate < earliestDate) earliestDate = newDate;
         })
       }
-      earliestDate = day.getDay() === 0 ?  new Date(day.setDate(day.getDate() - 6)) : new Date(day.setDate(day.getDate() - (day.getDay() - 1)));
+      earliestDate = day.getDay() === 0 ? new Date(day.setDate(day.getDate() - 6)) : new Date(day.setDate(day.getDate() - (day.getDay() - 1)));
       latestDate = exportRange.includes('this-week') ? latestDate : new Date(day.setDate(earliestDate.getDate() + 4));
     }
     if (exportRange === 'export-csv-all') {
@@ -484,22 +491,22 @@ export default class App extends React.Component {
       });
     }
     if (exportRange.includes('-this-month')) {
-      earliestDate = new Date(`${earliestDate.getMonth()+1}/01/${earliestDate.getFullYear()}`);
+      earliestDate = new Date(`${earliestDate.getMonth() + 1}/01/${earliestDate.getFullYear()}`);
     }
-    
+
     let range = [earliestDate.toLocaleDateString()];
     let date = earliestDate;
-    
+
     while (date < latestDate) {
       let day = new Date(date.setDate(date.getDate() + 1));
       if (day.getDay() > 0 && day.getDay() < 6) range.push(new Date(day).toLocaleDateString());
     }
-    
+
     csvText = csvText.concat(range);
     csvText = csvText.join() + '\r\n';
-    
+
     let csv = csvText;
-    
+
     for (let c = 0; c < classList.length; c++) {
       let row = [classList[c].name];
       for (let i = 0; i < range.length; i++) {
@@ -528,10 +535,10 @@ export default class App extends React.Component {
 
     let text = csv;
     console.log(text);
-    let file; 
-    if (exportRange.includes('-this-week')) file = new File([text], `class_attendance_${range[0]}-${range[range.length-1]}.csv`, { type: "text/plain;charset=utf-8" });
-    else if (exportRange.includes('-last-week')) file = new File([text], `class_attendance_${range[0]}-${range[range.length-1]}.csv`, { type: "text/plain;charset=utf-8" });
-    else if (exportRange.includes('-this-month')) file = new File([text], `class_attendance_this_month_${new Date().toString().slice(4,7)}.csv`, { type: "text/plain;charset=utf-8" });
+    let file;
+    if (exportRange.includes('-this-week')) file = new File([text], `class_attendance_${range[0]}-${range[range.length - 1]}.csv`, { type: "text/plain;charset=utf-8" });
+    else if (exportRange.includes('-last-week')) file = new File([text], `class_attendance_${range[0]}-${range[range.length - 1]}.csv`, { type: "text/plain;charset=utf-8" });
+    else if (exportRange.includes('-this-month')) file = new File([text], `class_attendance_this_month_${new Date().toString().slice(4, 7)}.csv`, { type: "text/plain;charset=utf-8" });
     else if (exportRange.includes('-all')) file = new File([text], `class_attendance_all_logged_${this.state.date}.csv`, { type: "text/plain;charset=utf-8" });
     FileSaver.saveAs(file)
   }
@@ -545,6 +552,48 @@ export default class App extends React.Component {
     FileSaver.saveAs(file)
     this.setState({ classListModified: 'No' });
   };
+  exportSeatingChart = (e) => {
+    e.preventDefault();
+    let seatingChartClone = document.getElementById('classroom');
+    let seatingChart = seatingChartClone.cloneNode(true);
+    seatingChart.id = 'screenshot-classroom'
+    let seatingChartScreenshot = document.getElementById('seating-chart-screenshot');
+    
+    let rows = seatingChart.childNodes
+    let desks = []
+    rows.forEach(row => {
+      row.childNodes.forEach(indDesk => {
+        indDesk.childNodes.forEach(desk => {
+          desk.className = 'desk';
+          desks.push(desk)
+        })
+      })
+    })
+    
+    let roster = document.createElement('div');
+    roster.id = 'roster';
+    seatingChartScreenshot.appendChild(roster);
+
+    roster = document.getElementById('roster');
+
+    let rosterText = '<div>';
+    this.state.classList.forEach((student, index) => {
+      rosterText += `<div><canvas id='checkBox-${index}' class='check-box'></canvas><h3>${student.name}</h3></div>`
+    })
+    rosterText += '</div>';
+    roster.innerHTML = rosterText;
+    seatingChartScreenshot.appendChild(roster);
+    seatingChartScreenshot.appendChild(seatingChart);
+    
+    this.getClassroomScale();
+    html2canvas(seatingChartScreenshot).then(canvas => {
+      canvas.toBlob(blob => {
+        FileSaver.saveAs(blob, "screenshot.png");
+      }, "image/png");
+    });
+    seatingChartScreenshot.removeChild(roster);
+    seatingChartScreenshot.removeChild(seatingChart);
+  }
   render() {
     let warning = {
       color: 'red'
@@ -583,6 +632,7 @@ export default class App extends React.Component {
                 <button id='toggle-attendance-button' onClick={this.toggleAttendance}>{this.state.mode.includes('Attendance') ? 'Submit Attendance' : 'Take Attendance'}</button>
                 {this.state.mode === 'Attendance' && <div id='attendance-notes'><p>Double click the student's name to mark them present / absent.</p><p>Or enable quick attendance for single click changes.</p></div>}
               </div>}
+              <button id='export-seating-chart' className='export' onClick={this.exportSeatingChart}>Export Seating Chart</button>
               {this.state.attendanceTaken && this.state.classListModified === 'Yes' && (<div>
                 <button id='export-attendance-button' className='export' onClick={this.exportAttendanceList}>Export Attendance List JSON</button>
                 <div className='export'>
@@ -643,6 +693,7 @@ export default class App extends React.Component {
             <div><button id='removal-confimation-export-button' onClick={this.exportAttendanceList}>Export class list first, just in case...</button></div>
           </div>
         )}
+        <div id='seating-chart-screenshot'></div>
       </div>
     );
   }

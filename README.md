@@ -44,7 +44,8 @@ Main Panel
 Backend 
 - Expand to have multiple classrooms, with searchable dashboard
 - Create tardy threshold for present based on time attendance status has changed
-- Export PDF of Seating Chart
+- ~~Export PNG of Seating Chart~~
+  - Create form to (de)select items for PNG (Seating Chart, Class List, Check Boxes) 
 - Export Excel of ~~present,~~ tardy ~~absent~~
 - Grace period for tardy, back up manual override (that flags it as manual override) in case forgot to take attendance on time
 - ~~Export attendance list (for testing)~~

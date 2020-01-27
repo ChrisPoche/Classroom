@@ -14,7 +14,7 @@ body {
   width: 100vw;
   height: 100vh;
 }
-#classroom-details {
+#classroom-details, #roster {
   position: absolute;
   left: 3vw;
   top: 20px;
@@ -23,7 +23,7 @@ body {
 #clock {
   transform-origin: top left;
 }
-#classroom {
+#classroom, #screenshot-classroom {
   position: absolute;
   left: 29vw;
   transform-origin: top center;
@@ -193,4 +193,31 @@ button {
 }
 #export-csv-all {
   display: block;
+}
+#export-seating-chart {
+  top: 77vh;
+}
+#seating-chart-screenshot {
+  position: fixed;
+  background-color: white;
+  left: 100vw;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+}
+#roster {
+  transform-origin: top left;
+}
+#roster h3 {
+  margin: 2px 0;
+  display: inline-block;
+}
+.check-box {
+  transform: translateY(-3px);
+  margin: 0 20px 0 30px;
+  vertical-align: middle;
+  display: inline-block;
+  border: 3px solid black;
+  width: 15px;
+  height: 15px;
 }
