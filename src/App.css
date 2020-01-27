@@ -22,6 +22,10 @@ body {
 }
 #clock {
   transform-origin: top left;
+  margin-top: -8px;
+}
+#clock-date {
+  margin-bottom: 0;
 }
 #classroom, #screenshot-classroom {
   position: absolute;

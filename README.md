@@ -9,7 +9,7 @@ Widgets
 - Stoplight 
 - Work Actions (silent, work with partner, etc)
 - Dice
-- Time includes small date above (can be toggled)
+- ~~Time includes small date above (can be toggled)~~
 - ~~Large clock in class details section~~
 - ~~Random Name Generator~~
   - ~~Random Name Generator only chooses students with a status of present~~
