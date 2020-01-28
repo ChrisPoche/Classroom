@@ -558,7 +558,7 @@ export default class App extends React.Component {
     let seatingChart = seatingChartClone.cloneNode(true);
     seatingChart.id = 'screenshot-classroom'
     let seatingChartScreenshot = document.getElementById('seating-chart-screenshot');
-    
+
     let rows = seatingChart.childNodes
     let desks = []
     rows.forEach(row => {
@@ -569,7 +569,7 @@ export default class App extends React.Component {
         })
       })
     })
-    
+
     let roster = document.createElement('div');
     roster.id = 'roster';
     seatingChartScreenshot.appendChild(roster);
@@ -584,7 +584,7 @@ export default class App extends React.Component {
     roster.innerHTML = rosterText;
     seatingChartScreenshot.appendChild(roster);
     seatingChartScreenshot.appendChild(seatingChart);
-    
+
     this.getClassroomScale();
     html2canvas(seatingChartScreenshot).then(canvas => {
       canvas.toBlob(blob => {
@@ -600,6 +600,9 @@ export default class App extends React.Component {
     }
     let noBold = {
       fontWeight: 'lighter'
+    }
+    let hidden = {
+      display: 'none'
     }
     if (this.state.functionTracking) console.log('%cRender', this.state.functionTrackingStyle);
     // if (this.state.functionTracking) console.log('ClassList',this.state.classList)
@@ -649,9 +652,11 @@ export default class App extends React.Component {
         {
           this.state.classList.length === 0 && (
             <div id='import-button'>
-              <p>New here? Click the button to import demo data</p>
-              <button id='no-date' onClick={this.importClassList}>Import Demo Data</button>
-              <p>Or choose a file with previous date info </p>
+            <p>New here? Click the button to import demo data</p>
+              <div style={hidden}> 
+                <button id='no-date' onClick={this.importClassList}>Import Demo Data</button>
+                <p>Or choose a file with previous date info </p>
+              </div>
               <input type='file' id='date' onChange={this.importClassList} />
               <p>You can find these files within the <strong>classroom > public > files directory</strong></p>
               <p style={warning}><strong>Note: this data set is saved to local storage, but can be manually cleared from the devTools Application tab</strong></p>
