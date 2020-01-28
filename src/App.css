@@ -23,6 +23,7 @@ body {
 #clock {
   transform-origin: top left;
   margin-top: -8px;
+  transform: scale(1.75);
 }
 #clock-date {
   margin-bottom: 0;

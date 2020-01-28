@@ -4,7 +4,7 @@ export default class RandomNameGenerator extends React.Component {
     constructor(props) {
         super(props);
 
-        let filteredList = JSON.parse(localStorage.getItem('class-list'))
+        let filteredList = JSON.parse(localStorage.getItem('class-list')) || this.props.classList
             .filter(val => {
                 let record = val.attendance[val.attendance.length - 1];
                 return new Date().toLocaleDateString() === record.date && record.present.toString().includes('1');
@@ -16,6 +16,7 @@ export default class RandomNameGenerator extends React.Component {
             randomName: '',
             filteredList,
             nrClassList: nrClassListLength > 0 ? JSON.parse(localStorage.getItem('no-repeat-class-list')) : filteredList,
+            noRepeatLocalStorage: JSON.parse(localStorage.getItem('no-repeat-class-list')) || filteredList
         }
     }
     componentDidMount = () => {
@@ -55,11 +56,12 @@ export default class RandomNameGenerator extends React.Component {
                 nrClassListLength > 0 ? JSON.parse(localStorage.getItem('no-repeat-class-list')) : filteredList || this.state.nrClassList;
         let index = Math.floor(Math.random() * classList.length);
         let randomName = classList[index];
-        if (randomName === this.state.randomName && this.state.filteredList.length <= 2) this.grabName(e);
+        if (randomName === this.state.randomName && this.state.filteredList.length >= 2) this.grabName(e);
         else {
             this.setState({ randomName });
             // console.log(classList)
             if (e.target.id === 'generate-name-button-no-repeats') classList.length < 1 ? localStorage.setItem('no-repeat-class-list', JSON.stringify(this.state.filteredList)) : localStorage.setItem('no-repeat-class-list', JSON.stringify(classList.filter((val, ind) => ind !== index)));
+            if (e.target.id === 'generate-name-button-no-repeats') classList.length < 1 ? this.setState({ noRepeatLocalStorage: this.state.filteredList}) : this.setState({ noRepeatLocalStorage: classList.filter((val, ind) => ind !== index)});
             // console.log('List Total Before Removal', classList.length)
             // console.log('grabbing name', randomName);
             // console.log('New List', classList.filter((val, ind) => ind !== index));
@@ -81,7 +83,7 @@ export default class RandomNameGenerator extends React.Component {
                 <button id='generate-name-button-no-repeats' onClick={this.grabName}>(Without Repeats)</button>
                 <div>
                     <p id='random-name'>{this.state.randomName}</p>
-                    {this.state.randomName && <p onClick={this.clearName} style={styleClear}>clear name</p>}
+                    {this.state.randomName && <p id='clear-name' onClick={this.clearName} style={styleClear}>clear name</p>}
                 </div>
             </div>
         );

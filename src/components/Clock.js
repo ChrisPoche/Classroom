@@ -10,7 +10,7 @@ export default class Clock extends React.Component {
             false;
         let time = twentyFourHour ? new Date().toTimeString() : new Date().toLocaleTimeString();
         time = twentyFourHour ? time.slice(0, time.indexOf(' ') - 3) : time.slice(0, time.indexOf(' ') - 3) + time.slice(time.indexOf(' '));
-        console.log('Clock Date',localStorage.getItem('Clock-date'));
+        // console.log('Clock Date',localStorage.getItem('Clock-date'));
         let clockDate = localStorage.getItem('Clock-date') ?
             localStorage.getItem('Clock-date') === 'true' ?
                 new Date().toDateString() :
@@ -26,9 +26,6 @@ export default class Clock extends React.Component {
     componentDidMount = () => {
         this.getTime();
         localStorage.setItem('Clock-ISO-Format', this.state.twentyFourHour);
-        let clock = document.getElementById('clock');
-        clock.style.transform = 'scale(1.75)';
-        console.log(this.state.clockDate);
     }
     componentDidUpdate = () => {
         this.getTime();
