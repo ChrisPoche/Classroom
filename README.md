@@ -51,6 +51,7 @@ Backend
 - ~~Export attendance list (for testing)~~
 - Enable (full) touch screen compatability
 - Improve dynamic scaling on all objects
+- Set up tests (Jest, Enzyme) (In Progress)
 
 
 ## Available Scripts
