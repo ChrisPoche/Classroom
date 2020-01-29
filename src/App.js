@@ -32,6 +32,7 @@ export default class App extends React.Component {
       date,
       mode: '', // edit
       addStudent: '',
+      fullScreen: false,
       // functionTracking: true,
       functionTracking: false,
       functionTrackingStyle: 'font-weight:bolder; font-size:medium; text-decoration: underline; color:green;',
@@ -68,9 +69,11 @@ export default class App extends React.Component {
     document.addEventListener('keydown', (e) => {
       if (document.activeElement !== document.getElementById('add-student-input')) {
         if (this.state.classList.length > 0) {
+          if (e.key === 'Escape' && this.state.fullScreen) this.toggleFullScreen();
           if (this.state.mode === 'remove-student') return this.clearConfirmation();
           if (e.key === 's') if (this.state.mode === 'edit') this.changeRearrangeType();
           if (e.key === 'e') this.changeEdit(e);
+          if (e.key === 'f') this.toggleFullScreen();
           if (e.key === 'a' || e.key === 't' || e.key === 'q') {
             this.toggleAttendance(e);
             if (e.key === 'q') this.changeQuickAttendance(e);
@@ -604,6 +607,40 @@ export default class App extends React.Component {
     this.setState({ classList, addStudent: '', classListModified: 'Yes' });
     localStorage.setItem('class-list', JSON.stringify(classList));
   }
+  toggleFullScreen = () => {
+    let classroom = document.getElementById('classroom');
+    let classroomDetails = document.getElementById('classroom-details');
+    let rows = classroom.childNodes;
+
+    if (this.state.fullScreen === false) {
+      classroomDetails.style.display = 'none';
+      let fullScreenStyle = {
+        transition: 'linear 1000ms',
+        width: '100vw',
+        left: '0',
+      }
+      rows.forEach(row => {
+        row.style.width = '100vw';
+      })
+      for (let css in fullScreenStyle) {
+        classroom.style[css] = fullScreenStyle[css];
+      };
+      this.getClassroomScale();
+      this.setState({ fullScreen: true });
+      setTimeout(() => {
+        classroom.removeAttribute('transition');
+      }, 1500);
+    }
+    else if (this.state.fullScreen) {
+      classroomDetails.removeAttribute('style');
+      classroom.removeAttribute('style');
+      rows.forEach(row => {
+        row.removeAttribute('style');
+      });
+      this.getClassroomScale();
+      this.setState({ fullScreen: false });
+    }
+  }
   render() {
     let warning = {
       color: 'red'
@@ -672,8 +709,8 @@ export default class App extends React.Component {
         {
           this.state.classList.length === 0 && (
             <div id='import-button'>
-            <p>New here? Click the button to import demo data</p>
-              <div style={hidden}> 
+              <p>New here? Click the button to import demo data</p>
+              <div style={hidden}>
                 <button id='no-date' onClick={this.importClassList}>Import Demo Data</button>
                 <p>Or choose a file with previous date info </p>
               </div>

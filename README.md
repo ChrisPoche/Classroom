@@ -32,7 +32,7 @@ Main Panel
   - Calendar month/week with green (present), yellow (tardy), red (absent) for each day
   - Same calendar but for whole class instead of individual student
 - Enable PowerPoint to be uploaded and run in browser
-- Enable full screen mode of main panel
+- ~~Enable full screen mode of main panel~~
 - Add students one-by-one, or list (comma delimited, semi-colon, hard return)
 - Within Edit Mode restrict functions when locked: 
   - ~~Disabling the rearrangement of students~~ 
