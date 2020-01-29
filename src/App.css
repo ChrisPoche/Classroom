@@ -18,14 +18,19 @@ body {
   position: absolute;
   left: 3vw;
   top: 20px;
-  width: 29vw;
+  width: 26vw;
+  margin-right: 2vw;
 }
 #clock {
+  width: 26vw;
+  display: block;
   transform-origin: top left;
-  margin-top: -8px;
-  transform: scale(1.75);
+  margin: -1vw 0;
+  font-size: 5.5vw;
+  /* transform: scale(1.75); */
 }
 #clock-date {
+  font-size: 1.2vw;
   margin-bottom: 0;
 }
 #classroom, #screenshot-classroom {
@@ -40,13 +45,14 @@ body {
   justify-content: space-around;
 }
 .desk {
+  font-size: 1.5vw;
   touch-action: none;
   display: inline-block;
   width: 10vw;
   height: 10vw;
   background-color: gray;
   text-align: center;
-  line-height: 100px;
+  line-height: 9vw;
   -moz-user-select: none;
    -khtml-user-select: none;
    -webkit-user-select: none;
@@ -107,13 +113,13 @@ button {
   position: absolute;
   display: inline-block;
   margin-left: -0.85vw;
-  margin-top: .6vw;
+  margin-top: 1vw;
   text-align: center;
   background-color: white;
   width: 1.5vw;
   height: 1.5vw;
-  font-size: large;
-  line-height: .8; /* Lowercase x lineheight: .8,  Uppercase X lineheight: 1   */
+  font-size: 1.3vw;
+  line-height: 1; /* Lowercase x lineheight: .8,  Uppercase X lineheight: 1   */
   border-radius: 50%;
   font-weight: bolder;
   border: rgba(0, 0, 0, .2) 1px solid;

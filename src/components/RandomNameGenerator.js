@@ -21,9 +21,11 @@ export default class RandomNameGenerator extends React.Component {
     }
     componentDidMount = () => {
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'n') this.grabName('generate-name-button-no-repeats');
-            if (e.key === 'r' || e.key === 'g') this.grabName('generate-name-button');
-          })
+            if (document.activeElement !== document.getElementById('add-student-input')) {
+                if (e.key === 'n') this.grabName('generate-name-button-no-repeats');
+                if (e.key === 'r' || e.key === 'g') this.grabName('generate-name-button');
+            }
+        })
     }
     updateList = (filteredList) => {
         this.setState({ filteredList });
@@ -61,7 +63,7 @@ export default class RandomNameGenerator extends React.Component {
             this.setState({ randomName });
             // console.log(classList)
             if (e.target.id === 'generate-name-button-no-repeats') classList.length < 1 ? localStorage.setItem('no-repeat-class-list', JSON.stringify(this.state.filteredList)) : localStorage.setItem('no-repeat-class-list', JSON.stringify(classList.filter((val, ind) => ind !== index)));
-            if (e.target.id === 'generate-name-button-no-repeats') classList.length < 1 ? this.setState({ noRepeatLocalStorage: this.state.filteredList}) : this.setState({ noRepeatLocalStorage: classList.filter((val, ind) => ind !== index)});
+            if (e.target.id === 'generate-name-button-no-repeats') classList.length < 1 ? this.setState({ noRepeatLocalStorage: this.state.filteredList }) : this.setState({ noRepeatLocalStorage: classList.filter((val, ind) => ind !== index) });
             // console.log('List Total Before Removal', classList.length)
             // console.log('grabbing name', randomName);
             // console.log('New List', classList.filter((val, ind) => ind !== index));
