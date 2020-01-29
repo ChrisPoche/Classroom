@@ -6,6 +6,8 @@ import Adapter from 'enzyme-adapter-react-16';
 // import 'jest-localstorage-mock';
 //import { localStorageMock } from '../src/setupTests';
 
+jest.mock('./App');
+
 import App from './App';
 import Clock from './components/Clock';
 import RandomNameGenerator from './components/RandomNameGenerator';
@@ -93,4 +95,17 @@ describe('Testing RandomNameGenerator Component Functionalities', () => {
       rNG.find('#clear-name').simulate('click');
       expect(rNG.state('randomName').length).toBe(0);
   });
+})
+describe('Testing App Component Functionalities', () => {
+  it('Add Student to Classrooom', () => {
+    const classList = [
+      { "name": "Jamarcus", "order": 1, "attendance": [{ "date": new Date().toLocaleDateString(), "present": 1 }] },
+      { "name": "Justice", "order": 2, "attendance": [{ "date": new Date().toLocaleDateString(), "present": 0 }] },
+      { "name": "Felicity", "order": 3, "attendance": [{ "date": new Date().toLocaleDateString(), "present": 1 }] },
+      { "name": "Marisol", "order": 4, "attendance": [{ "date": new Date().toLocaleDateString(), "present": 0 }] },
+      { "name": "Lucy", "order": 5, "attendance": [{ "date": new Date().toLocaleDateString(), "present": 0 }] }]
+    
+    
+      const classroom = mount((<App />),);
+  })
 })
